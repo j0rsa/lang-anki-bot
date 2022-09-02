@@ -1,0 +1,5 @@
+CREATE TABLE token(
+  login TEXT NOT NULL PRIMARY KEY,
+  value TEXT NOT NULL,
+  expires_at TIMESTAMP NOT NULL
+);

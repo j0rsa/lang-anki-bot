@@ -1,0 +1,54 @@
+name: CI
+
+on: [push]
+
+env:
+  DOCKER_IMAGE: docker.io/j0rsa/lang-anki-bot
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    env:
+      BINARY_NAME: lang-anki-bot
+      DOCKER_TARGET_PLATFORM: linux/amd64,linux/arm64/v8 #linux/arm/v7
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+
+      - name: Set Vars
+        id: vars
+        run: |
+          echo ::set-output name=sha_short::$(git rev-parse --short=6 ${{ github.sha }})
+
+      - name: Docker login
+        if: github.ref == 'refs/heads/main'
+        uses: azure/docker-login@v1
+        with:
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: crazy-max/ghaction-docker-buildx@v1
+        with:
+          version: latest
+
+      - name: Docker buildx build
+        if: github.ref != 'refs/heads/main'
+        run: |
+          docker buildx build \
+          --platform ${DOCKER_TARGET_PLATFORM} \
+          --build-arg BINARY_NAME=${BINARY_NAME} \
+          --tag ${DOCKER_IMAGE}:latest \
+          .
+
+      - name: Docker buildx build and push
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker buildx build \
+          --platform ${DOCKER_TARGET_PLATFORM} \
+          --build-arg BINARY_NAME=${BINARY_NAME} \
+          --tag ${DOCKER_IMAGE}:latest \
+          --push .
