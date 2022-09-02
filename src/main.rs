@@ -54,10 +54,44 @@ async fn main() {
 
 #[cfg(test)]
 mod test {
+    use crate::lib::models::service_credential::ServiceCredential;
+    use crate::lib::upstream::lingoda::Lingoda;
+    use std::error::Error;
+    use crate::lib::downstream::anki_cloze_note::{ AnkiClozeNote, AnkiClozable};
     use super::*;
 
-    #[test]
-    fn test_url_picture_parse() {
+    #[tokio::test]
+    async fn lingoda_to_anki() -> Result<(), Box<dyn Error>> {
+        let anki = Anki::new(env::var("ANKI_URL").expect("No Anki URL specified"));
+        let deck = env::var("ANKI_DECK").expect("No Deck specified");
+        let cred = ServiceCredential::no_token_new(
+            env::var("LINGODA_USER").expect("No username specified").as_ref(),
+            env::var("LINGODA_PASSWORD").expect("No password specified").as_ref(),
+        );
+        let lingoda = Lingoda::new();
+        let lesson_id = env::var("LINGODA_LESSON_ID")
+            .expect("No lingoda lesson ID specified")
+            .parse::<i64>()
+            .expect("lesson ID should be a number");
 
+        let anki_notes =
+            lingoda.get_lesson_words(Box::new(cred), lesson_id)
+                .await?
+                .iter()
+                .map(|w| w.to_cloze(&deck))
+                .map(|acn| acn.to_anki_note())
+                .collect::<Vec<Note>>();
+
+        for note in anki_notes {
+            anki.add_note(note)
+                .await
+                .expect("Failed to add note to anki");
+        }
+
+        anki.sync()
+            .await
+            .expect("Failed to sync anki");
+
+        Ok(())
     }
 }

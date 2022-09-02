@@ -14,38 +14,38 @@ impl AnkiClozeNote {
         let tags_list = string_tags.split(',').map(|s| s.to_owned()).collect::<Vec<_>>();
         AnkiClozeNote { deck_name, text, audio, tags: tags_list }
     }
-}
 
-pub fn anki_cloze_note(anki_cloze_note: AnkiClozeNote) -> Note {
-    Note {
-        deck_name: anki_cloze_note.deck_name.clone(),
-        model_name: "Cloze".to_string(),
-        fields: Fields {
-            text: anki_cloze_note.text
-        },
-        options: Options {
-            allow_duplicate: false,
-            duplicate_scope: "deck".to_string(),
-            duplicate_scope_options: Some(DuplicateScopeOptions {
-                deck_name: "Default".to_string(),
-                check_children: false,
-                check_all_models: false
-            })
-        },
-        tags: anki_cloze_note.tags,
-        audio: match anki_cloze_note.audio {
-            Some(attachment) => vec![attachment.clone()],
-            None => vec![],
-        },
-        picture: vec![
-            Attachment {
-                url: "".to_string(),
-                filename: "".to_string(),
-                fields: vec![
-                    "Extra".to_string(),
-                ]
-            }
-        ]
+    pub fn to_anki_note(self) -> Note {
+        Note {
+            deck_name: self.deck_name.clone(),
+            model_name: "Cloze".to_string(),
+            fields: Fields {
+                text: self.text
+            },
+            options: Options {
+                allow_duplicate: false,
+                duplicate_scope: "deck".to_string(),
+                duplicate_scope_options: Some(DuplicateScopeOptions {
+                    deck_name: "Default".to_string(),
+                    check_children: false,
+                    check_all_models: false
+                })
+            },
+            tags: self.tags,
+            audio: match self.audio {
+                Some(attachment) => vec![attachment.clone()],
+                None => vec![],
+            },
+            picture: vec![
+                Attachment {
+                    url: "".to_string(),
+                    filename: "".to_string(),
+                    fields: vec![
+                        "Extra".to_string(),
+                    ]
+                }
+            ]
+        }
     }
 }
 
@@ -87,6 +87,6 @@ mod test {
     }
 }
 
-trait AnkiClozable {
-    fn to_cloze(&self) -> AnkiClozeNote;
+pub trait AnkiClozable {
+    fn to_cloze(&self, deck_name: &String) -> AnkiClozeNote;
 }

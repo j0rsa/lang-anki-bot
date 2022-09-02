@@ -1,14 +1,19 @@
 query vocabularyItems($lessonIds: [Int!]!, $learningUnitId: Int) {
     vocabularyItems(lessonIds: $lessonIds, learningUnitId: $learningUnitId) {
+        id
+        lessons {
+            id
+            title
+            __typename
+        }
         title
+        plural
         wordClass
         gender
         sampleSentenceOne
         item
-        testQuestion
-        cefrLevel {
-            name
-        }
+        isCompleted
+
         __typename
     }
 }
