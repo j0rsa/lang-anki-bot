@@ -58,6 +58,7 @@ mod test {
     use crate::lib::upstream::lingoda::Lingoda;
     use std::error::Error;
     use std::thread;
+    use std::time::Duration;
     use crate::lib::downstream::anki_cloze_note::{ AnkiClozeNote, AnkiClozable};
     use super::*;
 
@@ -90,7 +91,7 @@ mod test {
                 .await
                 .expect("Failed to add note to anki");
             // println!("Added note: {:?}", response);
-            thread::sleep_ms(200);
+            thread::sleep(Duration::from_millis(200));
         }
 
         anki.sync()
