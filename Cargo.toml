@@ -18,7 +18,7 @@ graphql_client = { version = "0.11.0", features = [ "reqwest" ]}
 postgres-types = { version = "0.2.2", features = ["derive", "with-uuid-0_8"] }
 diesel = { version = "1.4.8", features = ["postgres", "r2d2", "uuidv07", "chrono"] }
 diesel_migrations = { version = "1.4.0", features = ["postgres"]}
-uuid = { version = "0.8.2", features = ["serde", "v4"] } #due to the diesel
+uuid = { version = "1.1.2", features = ["serde", "v4"] } #due to the diesel
 r2d2 = { version = "0.8.9" }
 chrono = "0.4.19"
 
