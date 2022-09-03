@@ -9,9 +9,15 @@ pub struct AnkiClozeNote {
 }
 
 impl AnkiClozeNote {
-    pub fn new(deck_name: String, text: String, tags: String, audio: Option<Attachment>) -> Self {
-        let mut string_tags = tags.clone();
-        let tags_list = string_tags.split(',').map(|s| s.to_owned()).collect::<Vec<_>>();
+    pub fn new(deck_name: String, text: String, tags: Option<String>, audio: Option<Attachment>) -> Self {
+        let tags_list = match tags {
+            None => {
+                vec![]
+            }
+            Some(tags) => {
+                tags.split(',').map(|s| s.to_owned()).collect::<Vec<_>>()
+            }
+        };
         AnkiClozeNote { deck_name, text, audio, tags: tags_list }
     }
 
@@ -26,7 +32,7 @@ impl AnkiClozeNote {
                 allow_duplicate: false,
                 duplicate_scope: "deck".to_string(),
                 duplicate_scope_options: Some(DuplicateScopeOptions {
-                    deck_name: "Default".to_string(),
+                    deck_name: self.deck_name.clone(),
                     check_children: false,
                     check_all_models: false
                 })
@@ -36,15 +42,7 @@ impl AnkiClozeNote {
                 Some(attachment) => vec![attachment.clone()],
                 None => vec![],
             },
-            picture: vec![
-                Attachment {
-                    url: "".to_string(),
-                    filename: "".to_string(),
-                    fields: vec![
-                        "Extra".to_string(),
-                    ]
-                }
-            ]
+            picture: vec![]
         }
     }
 }

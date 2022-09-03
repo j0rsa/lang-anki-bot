@@ -158,7 +158,7 @@ impl LoginRequest {
 impl AnkiClozable for VocabularyItemsVocabularyItems {
     fn to_cloze(&self, deck_name: &String) -> AnkiClozeNote {
         let text = format!("{}\n{{c1::{}}}\n\n{}", self.test_question, self.sample_sentence_one, self.title);
-        AnkiClozeNote::new(deck_name.clone(), text, "".to_string(), None)
+        AnkiClozeNote::new(deck_name.clone(), text, None, None)
     }
 }
 

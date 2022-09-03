@@ -57,6 +57,7 @@ mod test {
     use crate::lib::models::service_credential::ServiceCredential;
     use crate::lib::upstream::lingoda::Lingoda;
     use std::error::Error;
+    use std::thread;
     use crate::lib::downstream::anki_cloze_note::{ AnkiClozeNote, AnkiClozable};
     use super::*;
 
@@ -82,10 +83,14 @@ mod test {
                 .map(|acn| acn.to_anki_note())
                 .collect::<Vec<Note>>();
 
+        println!("Fetched {} notes", &anki_notes.len());
+
         for note in anki_notes {
             anki.add_note(note)
                 .await
                 .expect("Failed to add note to anki");
+            // println!("Added note: {:?}", response);
+            thread::sleep_ms(200);
         }
 
         anki.sync()

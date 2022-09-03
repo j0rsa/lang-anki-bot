@@ -1,11 +1,30 @@
+use std::fmt::Debug;
+use futures::future::join_all;
+use reqwest::header::VacantEntry;
 use super::super::errors::{Error, Result};
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
+
+trait AnkiAction{}
 
 #[derive(Serialize, Debug)]
 struct Action {
-    pub version: String,
+    pub version: i32,
     pub action: String,
-    pub params: Option<Note>,
+    pub params: Option<NoteWrapper>,
+}
+
+#[derive(Serialize, Debug)]
+struct ShortAction {
+    pub version: i32,
+    pub action: String,
+}
+
+impl AnkiAction for Action {}
+impl AnkiAction for ShortAction {}
+
+#[derive(Serialize, Debug)]
+pub struct NoteWrapper {
+    pub note: Note,
 }
 
 #[derive(Serialize, Debug)]
@@ -28,9 +47,11 @@ pub struct Fields {
 
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct Options{
-    pub allow_duplicate: bool, //false
-    pub duplicate_scope: String, //deck
+pub struct Options {
+    pub allow_duplicate: bool,
+    //false
+    pub duplicate_scope: String,
+    //deck
     pub duplicate_scope_options: Option<DuplicateScopeOptions>,
 
 }
@@ -38,8 +59,10 @@ pub struct Options{
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct DuplicateScopeOptions {
-    pub deck_name: String, //"Default"
-    pub check_children: bool, //false
+    pub deck_name: String,
+    //"Default"
+    pub check_children: bool,
+    //false
     pub check_all_models: bool, //false
 }
 
@@ -55,6 +78,12 @@ pub struct Anki {
     url: String,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct AnkiResult<T> {
+    pub result: T,
+    pub error: Option<String>,
+}
+
 impl Anki {
     pub fn new(url: String) -> Self {
         let client = reqwest::Client::new();
@@ -63,38 +92,72 @@ impl Anki {
             url,
         }
     }
-    pub async fn sync(&self) -> Result<()> {
-        let data = Action {
-            version: "6".to_string(),
-            action: "sync".to_string(),
-            params: None,
-        };
+
+    async fn run_action<T: AnkiAction + Sized + Serialize + Debug>(&self, action: T) -> Result<reqwest::Response> {
         let path = self.url.clone();
+        println!("Running the action: {:#?}", serde_json::to_string(&action));
         self.client.post(&path)
-            .json(&data)
-            .send().await
-            .map(|_| ())
+            .json(&action)
+            .send()
+            .await
             .map_err(|e| Error::Reqwest { e, path })
+    }
+
+    pub async fn get_decks(&self) -> Result<Vec<String>> {
+        let data = ShortAction {
+            version: 6,
+            action: "deckNames".to_string(),
+        };
+        let run = self.run_action(data).await
+            .map(|res| async {
+                let body = res.text().await.unwrap();
+                println!("Response body: {}", body);
+                let response: AnkiResult<Vec<String>> = serde_json::from_str(&body)
+                    .expect(&*format!("failed to get the correct response. Got {}", body));
+                response.result
+            });
+        match run {
+            Ok(res) => Ok(res.await),
+            Err(e) => Err(e)
+        }
+    }
+
+    pub async fn sync(&self) -> Result<()> {
+        let data = ShortAction {
+            version: 6,
+            action: "sync".to_string(),
+        };
+        match self.run_action(data).await {
+            Ok(r) => {
+                println!("Response: {:#?}", r);
+                Ok(())
+            },
+            Err(e) => Err(e)
+        }
+
     }
 
     pub async fn add_note(&self, note: Note) -> Result<()> {
         let data = Action {
-            version: "6".to_string(),
+            version: 6,
             action: "addNote".to_string(),
-            params: Some(note),
+            params: Some(NoteWrapper { note }),
         };
-        let path = self.url.clone();
-        self.client.post(&path)
-            .json(&data)
-            .send().await
-            .map(|_| ())
-            .map_err(|e| Error::Reqwest { e, path })
+        self.run_action(data).await.map(|_|())
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[tokio::test]
+    async fn test_anki_desks() {
+        let anki = Anki::new("http://10.43.149.198".to_string());
+        let desks = anki.get_decks().await.unwrap();
+        assert!(desks.len() > 0);
+        println!("{:#?}", desks);
+    }
 
     #[tokio::test]
     async fn test_anki_sync() {
