@@ -9,7 +9,7 @@ extern crate diesel_migrations;
 // This macro from `diesel_migrations` defines an `embedded_migrations` module
 // containing a function named `run`. This allows the example to be run and
 // tested without any outside setup of the database.
-embed_migrations!();
+// embed_migrations!();
 
 use std::env;
 use std::process::exit;
@@ -18,8 +18,8 @@ use lib::downstream::{
     anki::*,
 };
 use crate::lib::db_config::DbConfig;
-use crate::lib::repository::{get_token, save_token};
-use diesel_migrations::RunMigrationsError;
+// use crate::lib::repository::{get_token, save_token};
+// use diesel_migrations::RunMigrationsError;
 
 #[tokio::main]
 async fn main() {
@@ -28,7 +28,7 @@ async fn main() {
 
     let pool = DbConfig::get_pool();
     DbConfig::test_connection(&pool).unwrap();
-    DbConfig::migrate_db(&pool).expect("Failed to migrate");
+    // DbConfig::migrate_db(&pool).expect("Failed to migrate");
 
 
 
@@ -91,7 +91,7 @@ mod test {
                 .await
                 .expect("Failed to add note to anki");
             // println!("Added note: {:?}", response);
-            thread::sleep(Duration::from_millis(200));
+            thread::sleep(Duration::from_millis(400));
         }
 
         anki.sync()

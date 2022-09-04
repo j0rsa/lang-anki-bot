@@ -6,9 +6,9 @@ use diesel::r2d2::{
 };
 use std::env;
 use std::process::exit;
-use diesel::migration::RunMigrationsError;
+// use diesel::migration::RunMigrationsError;
 use reqwest::redirect::Policy;
-use crate::embedded_migrations;
+// use crate::embedded_migrations;
 use super::errors::Error;
 
 #[derive(Clone, Debug)]
@@ -29,7 +29,7 @@ impl DbConfig {
         Ok(())
     }
 
-    pub fn migrate_db(pool: &Pool<ConnectionManager<PgConnection>>) -> Result<(), RunMigrationsError>{
-        embedded_migrations::run(&pool.clone().get().unwrap())
-    }
+    // pub fn migrate_db(pool: &Pool<ConnectionManager<PgConnection>>) -> Result<(), RunMigrationsError>{
+    //     embedded_migrations::run(&pool.clone().get().unwrap())
+    // }
 }
