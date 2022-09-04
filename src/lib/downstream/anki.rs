@@ -1,10 +1,11 @@
-use std::fmt::Debug;
-use futures::future::join_all;
-use reqwest::header::VacantEntry;
 use super::super::errors::{Error, Result};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use std::fmt::Debug;
+use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
+use reqwest_retry::policies::ExponentialBackoff;
+use reqwest_retry::RetryTransientMiddleware;
 
-trait AnkiAction{}
+trait AnkiAction {}
 
 #[derive(Serialize, Debug)]
 struct Action {
@@ -53,7 +54,6 @@ pub struct Options {
     pub duplicate_scope: String,
     //deck
     pub duplicate_scope_options: Option<DuplicateScopeOptions>,
-
 }
 
 #[derive(Serialize, Debug)]
@@ -74,7 +74,7 @@ pub struct Attachment {
 }
 
 pub struct Anki {
-    client: reqwest::Client,
+    client: ClientWithMiddleware,
     url: String,
 }
 
@@ -86,39 +86,46 @@ pub struct AnkiResult<T> {
 
 impl Anki {
     pub fn new(url: String) -> Self {
-        let client = reqwest::Client::new();
-        Self {
-            client,
-            url,
-        }
+        let retry_policy = ExponentialBackoff::builder().build_with_max_retries(5);
+
+        let client = ClientBuilder::new(reqwest::Client::new())
+            .with(RetryTransientMiddleware::new_with_policy(retry_policy))
+            .build();
+        Self { client, url }
     }
 
-    async fn run_action<T: AnkiAction + Sized + Serialize + Debug>(&self, action: T) -> Result<reqwest::Response> {
+    async fn run_action<T: AnkiAction + Sized + Serialize + Debug>(
+        &self,
+        action: T,
+    ) -> Result<reqwest::Response> {
         let path = self.url.clone();
         println!("Running the action: {:#?}", serde_json::to_string(&action));
-        self.client.post(&path)
+        self.client
+            .post(&path)
             .json(&action)
             .send()
             .await
             .map_err(|e| Error::Reqwest { e, path })
     }
 
+    #[allow(dead_code)]
     pub async fn get_decks(&self) -> Result<Vec<String>> {
         let data = ShortAction {
             version: 6,
             action: "deckNames".to_string(),
         };
-        let run = self.run_action(data).await
-            .map(|res| async {
-                let body = res.text().await.unwrap();
-                println!("Response body: {}", body);
-                let response: AnkiResult<Vec<String>> = serde_json::from_str(&body)
-                    .expect(&*format!("failed to get the correct response. Got {}", body));
-                response.result
-            });
+        let run = self.run_action(data).await.map(|res| async {
+            let body = res.text().await.unwrap();
+            println!("Response body: {}", body);
+            let response: AnkiResult<Vec<String>> = serde_json::from_str(&body).expect(&*format!(
+                "failed to get the correct response. Got {}",
+                body
+            ));
+            response.result
+        });
         match run {
             Ok(res) => Ok(res.await),
-            Err(e) => Err(e)
+            Err(e) => Err(e),
         }
     }
 
@@ -131,10 +138,9 @@ impl Anki {
             Ok(r) => {
                 println!("Response: {:#?}", r);
                 Ok(())
-            },
-            Err(e) => Err(e)
+            }
+            Err(e) => Err(e),
         }
-
     }
 
     pub async fn add_note(&self, note: Note) -> Result<()> {
@@ -143,7 +149,7 @@ impl Anki {
             action: "addNote".to_string(),
             params: Some(NoteWrapper { note }),
         };
-        self.run_action(data).await.map(|_|())
+        self.run_action(data).await.map(|_| ())
     }
 }
 

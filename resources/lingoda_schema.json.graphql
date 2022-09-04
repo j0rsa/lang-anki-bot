@@ -1,0 +1,1785 @@
+# This file was generated based on "lingoda_schema.json". Do not edit manually.
+
+schema {
+    query: Query
+    mutation: Mutation
+    subscription: Subscription
+}
+
+interface SymfonyUserInterface {
+    roles: [String!]!
+    userName: String!
+}
+
+union Purchase = ExtraCreditPurchase | LegacyPurchase | SubscriptionPurchase
+
+type Agreement {
+    acceptanceText: String!
+    acceptedAt: DateTime
+    body: String!
+    id: String!
+    isAccepted: Boolean!
+    isRequired: Boolean!
+    pdfLink: String
+    type: AgreementType
+}
+
+type Appointment {
+    appointmentLog: AppointmentLog
+    class: Klass!
+    id: Ulid!
+    isNewStudent: Boolean!
+    label: String
+    module: Module!
+    status: AppointmentStatus!
+    "Get statusByStudent"
+    statusByStudent: AppointmentStatusByStudentType
+    statusBySystem: AppointmentStatusBySystem
+    student: Student!
+    uid: Ulid!
+}
+
+type AppointmentLog {
+    answers: [AppointmentLogAnswer!]!
+    createdAt: DateTime!
+    feedback: String
+    isAttended: Boolean!
+    recommendedLevel: Module
+    updatedAt: DateTime!
+}
+
+type AppointmentLogAnswer {
+    answer: String!
+    appointmentLogQuestion: AppointmentLogQuestion!
+    id: Ulid!
+}
+
+type AppointmentLogQuestion {
+    answers: [AppointmentLogAnswer!]!
+    id: Ulid!
+    isRequired: Boolean!
+    label: String!
+    question: String!
+}
+
+type CefrLevel {
+    id: String!
+    name: String!
+}
+
+type ClassConfig {
+    classDefaultDurationMinutes: Int!
+    classStartTimePoint: Int!
+    enableGoToClassBeforeStartMinutes: Int!
+    enableStudentNoShowAfterStartMinutes: Int!
+    refundableAfterBookingForMinutes: Int!
+    refundableDaysBeforeStart: Int!
+    studentCancelLateHours: Int!
+    teacherCancelLateHours: Int!
+    teacherCancelLateHoursFake: Int!
+    teacherCancelLatePenaltyDays: Int!
+    teacherClassLogVisibleAfterStartMinutes: Int!
+    teacherMissedClassPenaltyDays: Int!
+    teacherResetBeforeStartHours: Int!
+    teacherShortNoticeCancelAfterCommitMinutes: Int!
+    teacherShortNoticeCancelBeforeStartHours: Int!
+    technicalIssueAfterStartMinutes: Int!
+}
+
+type ClassFeedback {
+    id: Int!
+}
+
+type ClassFeedbackAnswer {
+    active: Boolean!
+    answer: String!
+    answerType: ClassFeedbackAnswerType!
+    id: Ulid!
+    sentiment: ClassFeedbackSentimentType!
+}
+
+type ClassLog {
+    classroomChatLogUrl: String
+    createdAt: DateTime
+    id: Int
+    logMessage: String
+    updatedAt: DateTime
+}
+
+type ClassObservation {
+    id: Ulid!
+    observerFullName: String!
+    status: ClassObservationStatusType!
+}
+
+type ContentBlock {
+    icon: Icon
+    isStarred: Boolean!
+    label: String
+    location: Location!
+    table: StringMatrix
+    text: String!
+}
+
+type Country {
+    code: String!
+    commonName: String!
+}
+
+type Coupon {
+    code: String!
+    id: Int!
+}
+
+type Course {
+    externalId: String!
+    id: Ulid!
+    name: String
+    type: CourseType!
+}
+
+type CreateAdminResponse {
+    admin: TestAdmin!
+}
+
+type CreateTeacherResponse {
+    classes: [Klass!]!
+    invoices: [TeacherInvoice!]!
+    teacher: TestTeacher!
+}
+
+type CreateTestStudentResponse {
+    appointments: [TestAppointment]
+    credits: [TestCredit]
+    student: TestStudent!
+    subscriptions: [TestSubscription]
+}
+
+type Curriculum {
+    default: Boolean!
+    id: Int!
+    name: String!
+}
+
+type DateInterval {
+    days: Int!
+    forHumans: String!
+    hours: Int!
+    microseconds: Int!
+    minutes: Int!
+    months: Int!
+    seconds: Int!
+    weeks: Int!
+    years: Int!
+}
+
+type Exercise {
+    id: Ulid!
+    link: Url
+    score: Float
+}
+
+type ExtraCreditPurchase {
+    agreements: [Agreement!]!
+    canUseCoupon: Boolean!
+    chargeTotal: Price!
+    contentBlocks: [ContentBlock!]!
+    coupons: [Coupon!]!
+    discount: Price!
+    displayName: String!
+    groupCredits: Int!
+    id: String!
+    isSubscription: Boolean!
+    lastTransaction: Transaction
+    privateCredits: Int!
+    """
+
+    TODO: This is here for BC, drop this
+    """
+    productDescription: String
+    subtotal: Price!
+    total: Price!
+    type: PurchaseType!
+    validityInterval: DateInterval!
+}
+
+type FlashcardSpacedRepetition {
+    id: Ulid!
+    remembered: Boolean!
+    showAfter: DateTime!
+    step: Int!
+}
+
+type GrammarItem {
+    content: String
+    id: String!
+    isCompleted: Boolean!
+    lesson: Lesson
+    subtitle: String
+    title: String!
+}
+
+type H5PExercise {
+    id: String!
+    score: Float
+    title: String!
+    type: ExerciseType
+    url: String!
+}
+
+type Image {
+    contentType: String!
+    height: Int
+    id: Int!
+    updatedAt: DateTime!
+    urls: ImageUrl!
+    width: Int
+}
+
+type ImageUrl {
+    medium: String!
+    medium2x: String!
+    original: String!
+    thumbnail: String!
+    thumbnail2x: String!
+    thumbnail_large: String!
+    thumbnail_large2x: String!
+}
+
+type Klass {
+    activeAppointments: [Appointment!]!
+    annotatedPresentation: String
+    attendedPrice: Price!
+    availableWithoutPayment: Boolean!
+    classLog: ClassLog
+    classLogEnabled: Boolean!
+    classNote: String
+    confirmedAt: DateTime
+    endDate: DateTime!
+    id: Int!
+    isExisting: Boolean!
+    labels: [KlassLabel!]!
+    learningUnit: LearningUnit
+    lesson: Lesson
+    missedPrice: Price!
+    module: Module!
+    remuneration: Remuneration
+    startDate: DateTime!
+    status: ClassStatus!
+    statusByTeacher: ClassStatusByTeacherType
+    students: [Student!]
+    "Get teacher"
+    teacher: Teacher
+    total: Price
+    type: ClassType!
+    uniqueId: String
+}
+
+type Language {
+    fluency: LanguageFluency!
+    language: SpokenLanguage!
+}
+
+type LearningUnit {
+    chapter: Int!
+    id: Int
+    lessons: [Lesson!]!
+    module: Module
+    name: String!
+    vocabularyItems: [VocabularyItem!]!
+}
+
+type LegacyPurchase {
+    agreements: [Agreement!]!
+    canUseCoupon: Boolean!
+    chargeTotal: Price!
+    contentBlocks: [ContentBlock!]!
+    coupons: [Coupon!]!
+    discount: Price!
+    displayName: String!
+    groupCredits: Int!
+    id: String!
+    isSubscription: Boolean!
+    lastTransaction: Transaction
+    privateCredits: Int!
+    productDescription: String @deprecated(reason: "Will be replaced with @see \\App\\Store\\Content")
+    recurrenceInterval: DateInterval
+    rollover: LegacyRolloverData
+    subtotal: Price!
+    total: Price!
+    type: PurchaseType!
+    validityInterval: DateInterval!
+    withTrial: Boolean!
+}
+
+type LegacyRolloverData {
+    productId: Int!
+    recurrenceInterval: DateInterval
+    subTotal: Price!
+    total: Price!
+    trialInterval: DateInterval!
+}
+
+type Lesson {
+    availableWithoutPayment: Boolean!
+    description: String
+    id: Int!
+    label: String!
+    learningOutcome: String
+    learningOutcomes: [String!]
+    presentation: Media
+    presentationNumber: String
+    presentationUrl: Url
+    section: Section!
+    title: String
+    topics: String
+    type: LessonType
+}
+
+type Media {
+    contentType: String!
+    id: Int!
+    updatedAt: DateTime!
+    urls: MediaUrl!
+}
+
+type MediaUrl {
+    original: String!
+}
+
+type Module {
+    cefrLevelName: String
+    code: String!
+    description: String!
+    id: Int
+    """
+
+    Return only learning units with active lesson(s) for current user section
+    """
+    learningUnits: [LearningUnit!]!
+    longName: String!
+    name: String!
+    title: String!
+}
+
+type Mutation {
+    cancelClass(classId: String!, isImmediate: Boolean = false): Klass!
+    cancelScheduledPause: Subscription!
+    cancelSubscriptionWithFeedback(mood: EmojiType, reason: String!, reasonComment: String): SubscriptionFeedback!
+    cancelSubscriptionWithSurvey(mood: MoodType, reason: SubscriptionCancelReason, reasonComment: String): SubscriptionFeedback!
+    cancelTrial: Subscription!
+    createAppleCreditPurchase(price: PriceInput!, transactionReceipt: String!): ExtraCreditPurchase!
+    createB2GCourse(b2GCourse: B2GCourseInput!): Course!
+    createClassFeedback(classId: String!, learningMaterialCustomFeedback: String = "", learningMaterialFeedbackAnswers: [String!]! = [], learningMaterialRating: Float!, teacherCustomFeedback: String = "", teacherFeedbackAnswers: [String!]! = [], teacherRating: Float!): ClassFeedback!
+    createExtraCreditPurchase(currency: Currency!, groupCredits: Int!, privateCredits: Int!): ExtraCreditPurchase!
+    createFreeTrialPurchase(packageId: Ulid!): Purchase!
+    createLegacyPurchase(couponCode: String, currency: Currency!, productId: Int!): LegacyPurchase!
+    createMissedClassFeedback(classId: String!, missedClassFeedbackAnswers: [String!]! = []): ClassFeedback!
+    """
+
+    Will eventually replace product-based endpoint, for now just wrapping it
+    """
+    createPurchase(couponCode: String, currency: Currency!, packageId: Ulid!, withTrial: Boolean!): Purchase!
+    createTestAdmin(features: [Feature] = []): CreateAdminResponse!
+    createTestStudent(featureFlags: [FeatureFlag] = [], features: [Feature] = [], sectionName: SectionName!): CreateTestStudentResponse!
+    createTestTeacher(features: [Feature] = [], maxGroupAndIndividualClasses: Int, sectionName: SectionName!): CreateTeacherResponse!
+    createTestUsers: Boolean!
+    dismissStudentNotification(studentNotificationId: Ulid!): Boolean!
+    flashcardSpacedRepetition(remembered: Boolean!, vocabularyItemId: String!): FlashcardSpacedRepetition
+    iMissedClass(classId: String!, details: String, reason: MissedStatusReason!): Boolean!
+    pauseTeaching(pausedFrom: DateTime!, pausedUntil: DateTime!): Teacher!
+    removePauseTeaching: Teacher!
+    resetCumulativeFlashcardDeck(deck: Deck!): [VocabularyItem!]!
+    resetVocabularyItemsStatus(learningUnitId: Int!): Boolean!
+    restartExercises(lessonId: Int!, type: ExerciseType!): PracticeItem
+    reviewMachineNext: ReviewMachineProvider
+    reviewMachineReviewed(provider: ReviewMachineProvider!): Boolean!
+    schedulePause(pauseEndTime: DateTime!, pauseStartTime: DateTime!): Boolean!
+    setGrammarStatus(id: String!, status: GrammarStatus!): GrammarItem!
+    setVocabularyItemStatus(status: VocabularyStatus!, vocabularyItemId: String!): VocabularyItem!
+    setVocabularyItemsStatus(status: VocabularyStatus!, vocabularyItemIds: [String!]!): [VocabularyItem!]!
+    setVocabularyItemsStatusByLesson(lessonId: Int!, status: VocabularyStatus!): [VocabularyItem!]!
+    submitExerciseScore(exerciseId: Int!, lessonId: Int!, score: Float!, type: ExerciseType!): PracticeItem!
+    submitPresentationFeedback(classId: String!, feedback: String!): Boolean!
+    subscriptionCancellationSurvey(feedbacks: [SubscriptionCancellationFeedbackInput!]!, subscriptionId: Int!): [SubscriptionFeedback!]!
+    teacherAcceptAgreement(agreementId: String!): Agreement!
+    teacherCancelClass(classId: String!): Boolean!
+    teacherCancelClassObservation(classId: String!): ClassObservation
+    teacherCommitToClass(classId: String!): TeacherCalendarTimeSlot!
+    teacherLogAppointment(answerIds: [Ulid!]!, classId: String!, feedback: String, isAttended: Boolean!, recommendedLevel: Int, studentId: Int!): Klass!
+    teacherLogNoShow(classId: String!): Klass!
+    teacherLogTechnicalProblem(classId: String!, description: String!, screenshots: [Upload!]!): Klass!
+    teacherRemoveCertificate(id: String!): Boolean!
+    teacherSubmitClassLog(classId: String!, logMessage: String!): Klass!
+    teacherUpdateAccountSettings(accountSettingsInput: TeacherAccountSettingsInput!): Teacher!
+    teacherUpdateLanguages(teacherLanguagesInput: TeacherLanguagesInput!): Teacher!
+    teacherUpdateNotificationSettings(notificationSettingsInput: TeacherNotificationSettingsInput!): Teacher!
+    teacherUpdatePaymentInfo(paymentInfoInput: UpdatePaymentInfoInput!): Teacher!
+    teacherUpdatePreferences(teacherPreferencesInput: UpdateTeacherPreferencesInput!): Teacher!
+    teacherUpdateProfile(input: ProfileInput!): Teacher!
+    teacherUploadCertificate(certificates: [Upload!]!, type: CertificateType!): [TeacherCertificate!]!
+    updateExtraCreditPurchase(currency: Currency, groupCredits: Int, id: String!, privateCredits: Int): ExtraCreditPurchase!
+    updateLegacyPurchase(couponCode: String, currency: Currency, id: String!, productId: Int): LegacyPurchase!
+    """
+
+    Will eventually replace product-based endpoint
+    """
+    updatePurchase(couponCode: String, currency: Currency, id: String!): Purchase!
+}
+
+type OthersReferral {
+    ownerFirstName: String!
+    ownerPhoto: Image
+    userDiscount: [Price!]!
+}
+
+type OwnReferral {
+    code: String!
+    creditsFromReferred: Int!
+    ownerGroupCredits: Int!
+    stayedReferred: Int!
+    totalReferred: Int!
+    userDiscount: [Price!]!
+}
+
+type Pagination_Module {
+    "The total count of items."
+    count: Int!
+    "Current page number"
+    currentPage: Int!
+    "Has more items"
+    hasMore: Boolean!
+    items: [Module!]!
+}
+
+type PracticeItem {
+    class: Klass
+    classLog: ClassLog
+    exercises: [H5PExercise!]!
+    grammarItems: [GrammarItem!]!
+    isCompleted: Boolean!
+    learningUnit: PracticeItemLearningUnit!
+    lesson: PracticeItemLesson!
+    module: Module!
+    vocabularyItems: [VocabularyItem!]!
+}
+
+type PracticeItemLearningUnit {
+    chapter: Int!
+}
+
+type PracticeItemLesson {
+    id: Int!
+    number: Int!
+    presentationUrl: Url
+    title: String
+}
+
+type Price {
+    amount: Int!
+    amountInMajor: Float!
+    currency: Currency!
+    forHumans: String!
+}
+
+type PrivacyPolicy {
+    body: String!
+    id: String!
+    locale: String!
+}
+
+type Query {
+    anonymousOrientationGroupClasses(curriculumId: Int!, moduleId: Int!, sectionName: SectionName!, timezone: String!): [Klass!]!
+    anonymousOrientationIndividualClasses(curriculumId: Int!, moduleId: Int!, sectionName: SectionName!, timezone: String!): [Klass!]!
+    appointmentLog(classId: String!): AppointmentLog!
+    appointmentsList(appointmentStatus: String, fromDate: DateTime, limit: Int = 3, offset: Int = 0, sort: String = "ASC", toDate: DateTime): [Appointment!]!
+    calendarList: [UserExternalCalendar!]!
+    cefrLevels: [CefrLevel!]!
+    class(id: String!): Klass!
+    classFeedbackAnswers(sentiment: String!, type: String!): [ClassFeedbackAnswer!]!
+    classroomUrl(uniqueId: String!): String!
+    config: SystemConfig!
+    countries: [Country!]!
+    country(code: String!): Country
+    cumulativeFlashcardDeck(deck: Deck!): [VocabularyItem!]!
+    currentStudentSprint: Sprint
+    currentUser: User!
+    exercise(learningUnitId: Int!): Exercise
+    grammarItem(id: String!): GrammarItem!
+    grammarItems(lessonIds: [Int!]!): [GrammarItem!]!
+    learningUnit(learningUnitId: Int!): LearningUnit!
+    learningUnits(moduleId: Int): [LearningUnit!]!
+    lesson(id: Int!): Lesson!
+    newUserOrientationClassLeadTime(classType: String!, sectionName: SectionName!): String!
+    orientationModules(sectionName: SectionName!): [String!]!
+    """
+
+    Fetch user's own referral coupon
+    """
+    ownReferral: OwnReferral
+    package(currency: Currency!, packageId: Ulid!, sectionName: SectionName!): Variant
+    packages(currency: Currency!, sectionName: SectionName!, store: Store!): [Variant!]!
+    pastAppointmentsCount(toDate: DateTime): Int!
+    practiceItem(lessonId: Int!, status: String = ""): PracticeItem
+    practiceItems(lessonId: Int, limit: Int = 10, moduleId: Int, offset: Int = 0, status: PracticeItemStatus, type: ExerciseType): [PracticeItem!]!
+    privacyPolicy: PrivacyPolicy!
+    purchase(id: String!): Purchase
+    recommendedClasses(filter: ClassFilterInput!, page: Int = 0): [RecommendedClass!]!
+    recommendedExercises(count: Int!): [Exercise!]!
+    recommendedFlashcardDecks(decksCount: Int!): [LearningUnit!]!
+    recommendedPracticeItems(count: Int!): [PracticeItem!]!
+    """
+
+    Fetch referral by code - Intentionally public
+    """
+    referralByCode(code: String!): OthersReferral
+    sectionCurricula: [SectionCurriculum!]!
+    sections: [Section!]!
+    startingModules(curriculumId: Int!, sectionName: SectionName!): [StartingModule!]!
+    student: Student!
+    studentCreditsInfo: StudentCreditsInfo!
+    studentLastTwoWeeksClassesPendingReview: [Appointment!]!
+    studentModules(curriculumId: Int, sectionName: SectionName, studentId: Int): [StudentModule!]!
+    studentNotification: [StudentNotification!]!
+    studentSubscriptionInfo: StudentSubscriptionInfo!
+    subscriptionCancellationSurvey: QuestionnaireQuestion!
+    teacher: Teacher
+    teacherAppointmentLogQuestions: [AppointmentLogQuestion!]!
+    teacherCalendar(weekStartDate: DateTime): TeacherCalendar!
+    teacherCalendarEventDetails(eventStartDate: DateTime!): TeacherCalendarEventDetailsList!
+    teacherCertificates: [TeacherCertificate!]!
+    teacherClassObservation(classId: String!): ClassObservation
+    teacherInvoices(limit: Int!, offset: Int = 0): [TeacherInvoice!]!
+    teacherLearningMaterials(limit: Int!, page: Int!): Pagination_Module!
+    teacherOpenLogs: [Klass!]!
+    teacherOpenLogsCount: Int!
+    upcomingAppointmentDates: [DateTime!]!
+    upcomingAppointmentsCount(appointmentStatus: String, fromDate: DateTime): Int!
+    vocabularyItems(learningUnitId: Int, lessonIds: [Int!]! = []): [VocabularyItem!]!
+}
+
+type QuestionnaireQuestion {
+    answers: [QuestionnaireQuestionAnswer]
+    description: String!
+    id: String!
+    question: String!
+    questionSet: QuestionnaireQuestionSet
+}
+
+type QuestionnaireQuestionAnswer {
+    answer: String!
+    id: String!
+    slug: String!
+}
+
+type QuestionnaireQuestionSet {
+    id: String!
+    name: String!
+}
+
+type RecommendedClass {
+    availableWithoutPayment: Boolean!
+    id: String!
+    isGenerated: Boolean!
+    lesson: RecommendedClassLesson!
+    startDate: DateTime!
+    """
+
+    Ambiguous and encrypted, we don't want to expose it
+    """
+    stats: String!
+    students: [UserProfile!]!
+    teacher: UserProfile
+    type: ClassType!
+}
+
+type RecommendedClassLesson {
+    chapter: Int!
+    id: Int!
+    learningUnitId: Int!
+    moduleId: Int!
+    moduleName: String!
+}
+
+type Remuneration {
+    groupMissed: Price!
+    individualMissed: Price!
+}
+
+type Section {
+    id: Int!
+    name: SectionName!
+}
+
+type SectionCurriculum {
+    curriculum: Curriculum!
+    section: Section!
+}
+
+type Sprint {
+    durationMonths: Int!
+    id: String!
+    name: String!
+    startDate: DateTime!
+}
+
+type StartingModule {
+    code: String!
+    curriculum: Curriculum!
+    description: String!
+    id: String!
+    modules: [Module!]
+    title: String!
+}
+
+type Student {
+    completedClasses: Int!
+    curriculum: Curriculum!
+    firstLetterOfFirstName: String!
+    id: Int!
+    onboarded: Boolean!
+    photo: Image
+    receivedCertificates: Int!
+    registrationDate: DateTime
+    shortName: String!
+    timeFormat: String!
+    timezone: String!
+}
+
+type StudentCreditsInfo {
+    canBuyExtraCredits: Boolean!
+    contentBlocks: [ContentBlock!]!
+    groupCredits: Int!
+    privateCredits: Int!
+}
+
+type StudentModule {
+    cefrLevelName: String
+    code: String!
+    completedClasses: Int!
+    description: String!
+    id: Int!
+    learningUnits: [LearningUnit!]!
+    longName: String!
+    name: String!
+    position: Int!
+    title: String!
+    totalClasses: Int!
+}
+
+type StudentNotification {
+    contentKeys: [String!]!
+    contentTranslationKey: String!
+    contentValues: [String!]!
+    createdAt: DateTime!
+    id: Ulid!
+    student: Student!
+    titleTranslationKey: String!
+    type: String!
+}
+
+type StudentSubscriptionInfo {
+    currentSubscription: Subscription
+    latestSubscription: Subscription
+    nextSubscription: Subscription
+}
+
+type Subscription {
+    activatedAt: DateTime
+    canCancel: Boolean!
+    canCancelTrial: Boolean!
+    canChange: Boolean!
+    canPause: Boolean!
+    canReactivate: Boolean!
+    canStartNew: Boolean!
+    canStartNextNow: Boolean!
+    canUncancel: Boolean!
+    canUnpause: Boolean!
+    contentBlocks: [ContentBlock!]!
+    createdAt: DateTime
+    expiresAt: DateTime
+    id: Int!
+    "Tells whether a subscription is still within the trial period or was cancelled before the trial period ended"
+    isInTrial: Boolean!
+    isRecurring: Boolean!
+    pauseScheduled: Boolean!
+    price: Price!
+    status: SubscriptionStatus!
+    subscribeNow: Boolean!
+}
+
+type SubscriptionFeedback {
+    mood: String!
+    periodType: String!
+    reason: String!
+    studentCancelReason: String!
+}
+
+type SubscriptionPurchase {
+    agreements: [Agreement!]!
+    canUseCoupon: Boolean!
+    chargeTotal: Price!
+    contentBlocks: [ContentBlock!]!
+    coupons: [Coupon!]!
+    discount: Price!
+    displayName: String!
+    groupCredits: Int!
+    id: String!
+    isSubscription: Boolean!
+    lastTransaction: Transaction
+    privateCredits: Int!
+    """
+
+    TODO: This is here for BC, drop this
+    """
+    productDescription: String
+    recurrenceInterval: DateInterval
+    subtotal: Price!
+    total: Price!
+    type: PurchaseType!
+    """
+
+    For recurring, this is the same as the recurrenceInterval.
+    For non-recurring in general, it is the validity
+    For non-recurring LegacyPurchase specifically, it is coming from product.creditsValidityInterval
+    """
+    validityInterval: DateInterval!
+    withTrial: Boolean!
+}
+
+type SymfonyUserImpl implements SymfonyUserInterface {
+    roles: [String!]!
+    userName: String!
+}
+
+type SystemConfig {
+    classConfig: ClassConfig!
+    country: Country
+    currencies: [Currency!]!
+    deployEnvironment: String!
+    domains: Map!
+    languages: StringMap!
+    minimumCharges: Map!
+    pauseUntil: Int!
+    releaseId: String!
+    sentryFrontendDsn: String! @deprecated(reason: "TODO: Remove in another deployment")
+    stripePublishable: String!
+    timezone: String!
+    timezones: [Timezone!]!
+}
+
+type Teacher {
+    agreements: [Agreement!]!
+    email: String!
+    feedback: [TeacherFeedback!]!
+    firstName: String!
+    id: Int
+    lastName: String
+    notificationSettings: TeacherNotificationSettings
+    pausedFrom: DateTime
+    pausedUntil: DateTime
+    photo: Image
+    rating: TeacherRating!
+    section: Section
+    teacherInfo: TeacherInfo
+    teacherPreferences: TeacherPreference!
+    uid: String!
+}
+
+type TeacherCalendar {
+    startOfWeekDate: DateTime!
+    timeSlots: [TeacherCalendarTimeSlot!]!
+    totalAvailableClassesPerWeek: Int
+    totalBookedClassesThisWeek: Int!
+}
+
+type TeacherCalendarEvent {
+    classType: ClassType!
+    classUniqId: String!
+    isB2G: Boolean!
+    isBonus: Boolean!
+    isCommittedByTeacher: Boolean!
+    price: Price
+}
+
+type TeacherCalendarEventDetails {
+    classType: ClassType!
+    classUniqId: String!
+    isB2G: Boolean!
+    isBonus: Boolean!
+    isCommittedByTeacher: Boolean!
+    lesson: Lesson
+    module: String
+    price: Price
+    students: [Student!]!
+}
+
+type TeacherCalendarEventDetailsList {
+    eventStartDate: DateTime!
+    events: [TeacherCalendarEventDetails!]!
+}
+
+type TeacherCalendarTimeSlot {
+    events: [TeacherCalendarEvent!]!
+    startDate: DateTime!
+}
+
+type TeacherCertificate {
+    id: String!
+    type: CertificateType
+    url: String!
+}
+
+type TeacherFeedback {
+    classStartDate: DateTime!
+    feedback: String!
+    lessonTitle: String!
+}
+
+type TeacherInfo {
+    aboutMe: String!
+    address: String
+    address2: String
+    bic: String!
+    city: String
+    country: Country
+    defaultPaymentMethod: PaymentMethod
+    iban: String!
+    languages: [Language!]!
+    paypal: String!
+    postalCode: String
+    state: String
+    vatTaxNumber: String
+}
+
+type TeacherInvoice {
+    currency: Currency!
+    date: DateTime
+    id: Int!
+    items: [TeacherInvoiceItem!]!
+    pdfUrl: String
+    pending: Boolean!
+    total: Float!
+}
+
+type TeacherInvoiceItem {
+    amount: Price!
+    class: Klass!
+    date: DateTime!
+    id: Int!
+}
+
+type TeacherNotificationSettings {
+    feedback: Boolean!
+    otherClassCancellation: Boolean!
+    shortNoticeCancellation: Boolean!
+}
+
+type TeacherPreference {
+    groupClasses: Boolean!
+    privateClasses: Boolean!
+    specializedClasses: Boolean!
+    timeFormat: TimeFormat
+    timezone: String!
+    weekStart: Int!
+}
+
+type TeacherRating {
+    classesTaught: Int!
+    date: DateTime!
+    personalAverage: Float!
+    sectionAverage: Float!
+}
+
+type TestAdmin {
+    email: String!
+    id: Int!
+    roles: [String!]!
+    userName: String!
+}
+
+type TestAppointment {
+    class: TestClass!
+    status: AppointmentStatus!
+}
+
+type TestClass {
+    id: Int!
+    startDate: DateTime!
+    status: ClassStatus!
+    type: String!
+    uniqueId: String
+}
+
+type TestCredit {
+    amount: Int!
+    availabilityDate: DateTime!
+    expirationDate: DateTime!
+    type: String!
+}
+
+type TestStudent {
+    email: String!
+    id: Int!
+    userId: Int!
+}
+
+type TestSubscription {
+    allowsCancellation: Boolean!
+    allowsPause: Boolean!
+    expirationDate: DateTime
+    expired: Boolean!
+    id: Int!
+    lastChargeDate: DateTime
+    months: Int!
+    nextChargeDate: DateTime
+    price: Price!
+    resumingDate: DateTime
+    status: SubscriptionStatus!
+}
+
+type TestTeacher {
+    email: String!
+    id: Int!
+    roles: [String!]!
+    userName: String!
+}
+
+type Timezone {
+    label: String!
+    tz: String!
+}
+
+type Transaction {
+    errorCode: String
+    errorMessage: String
+    id: Int!
+    isInitialPurchase: Boolean!
+    isPaymentMethodUpdate: Boolean!
+    paymentStatus: PaymentStatus!
+}
+
+type User {
+    firstname: String!
+    fullName: String!
+    id: Int!
+    isEmailVerified: Boolean!
+    lastname: String
+    photo: Image
+}
+
+type UserExternalCalendar {
+    active: Boolean!
+    calendarType: String!
+}
+
+type UserProfile {
+    firstName: String!
+    id: Int!
+    photoUrl: String
+}
+
+type Variant {
+    contentBlocks: [ContentBlock!]!
+    curriculum: Curriculum
+    groupCredits: Int!
+    id: Ulid
+    isCurrent: Boolean!
+    percentageOfSavings: Int!
+    pricePerClass: Price!
+    privateCredits: Int!
+    sectionCurriculum: SectionCurriculum
+    subTotal: Price!
+    type: PurchaseType!
+    validityIntervalInMonths: Int!
+}
+
+type VocabularyItem {
+    answerToTestQuestion: String
+    audio: Media
+    audioUrl: Url
+    cefrLevel: CefrLevel!
+    gender: GenderType
+    id: String!
+    image: Image
+    isCompleted: Boolean!
+    isRealLifeLanguage: Boolean!
+    item: String
+    lessons: [Lesson!]!
+    plural: String
+    relatedItems: [VocabularyItem!]!
+    sampleSentenceOne: String!
+    section: Section!
+    testQuestion: String!
+    title: String!
+    wordClass: VocabularyItemWordClassType!
+}
+
+enum AgreementType {
+    marketing_communication
+    privacy_policy
+    product_policy
+    remuneration_structure
+    teacher_terms
+}
+
+enum AppointmentStatus {
+    active
+    attended
+    cancelled
+    deleted
+    missed
+}
+
+enum AppointmentStatusByStudentType {
+    cancelled
+    completed
+    no_teacher
+    not_attended
+}
+
+enum AppointmentStatusBySystem {
+    attended
+    incomplete
+    missed
+}
+
+enum CertificateType {
+    ba_ma_in_daf
+    ba_ma_in_fle
+    ba_ma_in_germanistik
+    ba_ma_in_lehramt
+    bamf
+    celta
+    daefle_alliance_francaise
+    goethe_institute_certificate_daf
+    institute_cervantes_certificate
+    master_in_ele
+    masters_in_tefl
+    other_english
+    other_french
+    other_german
+    other_spanish
+    pgce
+    tefl
+    tesol
+}
+
+enum ClassFeedbackAnswerType {
+    learning_material_feedback
+    teacher_feedback
+}
+
+enum ClassFeedbackSentimentType {
+    negative
+    positive
+}
+
+enum ClassObservationStatusType {
+    booked
+    cancelled_by_observer
+    cancelled_by_teacher
+    class_cancelled
+    not_booked
+}
+
+enum ClassStatus {
+    cancelled
+    completed
+    requested
+    scheduled
+    unsuccessful
+}
+
+enum ClassStatusByTeacherType {
+    active
+    cancelled
+    completed
+    missed
+    no_students
+    technical_issue
+}
+
+enum ClassType {
+    group
+    individual
+}
+
+enum CountryCode {
+    AD
+    AE
+    AF
+    AG
+    AI
+    AL
+    AM
+    AO
+    AQ
+    AR
+    AS
+    AT
+    AU
+    AW
+    AX
+    AZ
+    BA
+    BB
+    BD
+    BE
+    BF
+    BG
+    BH
+    BI
+    BJ
+    BL
+    BM
+    BN
+    BO
+    BQ
+    BR
+    BS
+    BT
+    BV
+    BW
+    BY
+    BZ
+    CA
+    CC
+    CD
+    CF
+    CG
+    CH
+    CI
+    CK
+    CL
+    CM
+    CN
+    CO
+    CR
+    CU
+    CV
+    CW
+    CX
+    CY
+    CZ
+    DE
+    DJ
+    DK
+    DM
+    DO
+    DZ
+    EC
+    EE
+    EG
+    EH
+    ER
+    ES
+    ET
+    FI
+    FJ
+    FK
+    FM
+    FO
+    FR
+    GA
+    GB
+    GD
+    GE
+    GF
+    GG
+    GH
+    GI
+    GL
+    GM
+    GN
+    GP
+    GQ
+    GR
+    GS
+    GT
+    GU
+    GW
+    GY
+    HK
+    HM
+    HN
+    HR
+    HT
+    HU
+    ID
+    IE
+    IL
+    IM
+    IN
+    IO
+    IQ
+    IR
+    IS
+    IT
+    JE
+    JM
+    JO
+    JP
+    KE
+    KG
+    KH
+    KI
+    KM
+    KN
+    KP
+    KR
+    KW
+    KY
+    KZ
+    LA
+    LB
+    LC
+    LI
+    LK
+    LR
+    LS
+    LT
+    LU
+    LV
+    LY
+    MA
+    MC
+    MD
+    ME
+    MF
+    MG
+    MH
+    MK
+    ML
+    MM
+    MN
+    MO
+    MP
+    MQ
+    MR
+    MS
+    MT
+    MU
+    MV
+    MW
+    MX
+    MY
+    MZ
+    NA
+    NC
+    NE
+    NF
+    NG
+    NI
+    NL
+    NO
+    NP
+    NR
+    NU
+    NZ
+    OM
+    PA
+    PE
+    PF
+    PG
+    PH
+    PK
+    PL
+    PM
+    PN
+    PR
+    PS
+    PT
+    PW
+    PY
+    QA
+    RE
+    RO
+    RS
+    RU
+    RW
+    SA
+    SB
+    SC
+    SD
+    SE
+    SG
+    SH
+    SI
+    SJ
+    SK
+    SL
+    SM
+    SN
+    SO
+    SR
+    SS
+    ST
+    SV
+    SX
+    SY
+    SZ
+    TC
+    TD
+    TF
+    TG
+    TH
+    TJ
+    TK
+    TL
+    TM
+    TN
+    TO
+    TR
+    TT
+    TV
+    TW
+    TZ
+    UA
+    UG
+    UM
+    US
+    UY
+    UZ
+    VA
+    VC
+    VE
+    VG
+    VI
+    VN
+    VU
+    WF
+    WS
+    YE
+    YT
+    ZA
+    ZM
+    ZW
+}
+
+enum CourseType {
+    corporate
+    doctors
+    midwifery
+    nursing
+}
+
+enum Currency {
+    EUR
+    USD
+}
+
+enum Deck {
+    completed
+    upcoming
+}
+
+enum EmojiType {
+    awesome
+    bad
+    good
+    horrible
+    ok
+}
+
+enum ExerciseType {
+    homework
+    quiz
+}
+
+enum Feature {
+    hasAvailableToBookClasses
+    hasBeenOnboarded
+    hasBookedCustomClass
+    hasBookedOrientationClass
+    hasCancelledClassOnShortNotice
+    hasClassMoreThanWeekLater
+    hasClassStartingInTenMinutes
+    hasClassStartingInThreeMinutes
+    hasClassStartingNow
+    hasClassesWithAndWithoutTeacher
+    hasComingClassIn2Hours
+    hasComingClassIn5Hours
+    hasComingClassInMoreThan24Hours
+    hasCompletedClass
+    hasCompletedModule
+    hasConsentedToMarketingCommunication
+    hasDisabledOrientationBanner
+    hasExpiredSubscription
+    hasFullyCompletedNextLevel
+    hasFutureClass
+    hasFuturePrivateClass
+    hasGeneratedInvoice
+    hasGroupCredits
+    hasGroupSubscriptionWithTrial
+    hasMissedClass
+    hasNextSubscription
+    hasPartiallyCompletedCurrentLevel
+    hasPartiallyCompletedEachChapter
+    hasParticipationInOngoingSprint
+    hasParticipationInUpcomingSprint
+    hasPastClass
+    hasPastClasses
+    hasPastPrivateClasses
+    hasPauseScheduledSubscription
+    hasPausedSubscription
+    hasPaymentMethods
+    hasPendingClassReview
+    hasPendingClassReviewRightNow
+    hasPendingInvoice
+    hasPrivateClassStartingNow
+    hasPrivateCredits
+    hasPrivateSubscriptionWithTrial
+    hasRecurringPrivateSubscription
+    hasRecurringSubscription
+    hasSocialLogin
+    hasStartedClassLessThanFifteenMinutes
+    hasStartedClassMoreThanFifteenMinutes
+    hasSubscribeLingodaBanner
+    hasSubscribeLingodaPopup
+    hasSuperAdmin
+    hasUserCreatedEightMonthsAgo
+    hasUserCreatedFourDaysAgo
+    hasUserCreatedTweentyFiveDaysAgo
+    hasZeroCredits
+}
+
+enum FeatureFlag {
+    bookClassBeforeTrialStart
+    bookClassesWithCurriculum
+    displayTodayAndSchedulePage
+    easyGenerator
+    emailVerification
+    flashcards
+    leadConversionFlow
+    newCancellationPolicy
+    newClassPage
+    newProductsAaTest
+    newRegistrationPage
+    recommender
+    shareCertificate
+    shorterClassLeadTimeForFrench
+    skipCreditCardForTrialDirectPurchase
+    teacherFrontend
+    teacherFrontendProfile
+    tempDebuggingHelperExperiment
+    writingPractice
+}
+
+enum GenderType {
+    feminine
+    masculine
+    masculine_feminine
+    neutral
+}
+
+enum GrammarStatus {
+    Completed
+    Uncompleted
+}
+
+enum Icon {
+    CHECKMARK
+    HEART
+    PAY_IN_RATES
+    PRICETAG
+    SECTION_DE
+    SECTION_EN
+    SECTION_ES
+    SECTION_FR
+    STUDY_CALENDAR
+    TRIAL
+}
+
+enum KlassLabel {
+    Adg
+    Bonus
+    Group
+    MissedClass
+    NoShow
+    Private
+    TechIssue
+}
+
+enum LanguageFluency {
+    A1
+    A2
+    B1
+    B2
+    C1
+    C2
+    Native
+}
+
+enum LessonType {
+    chapter_check
+    communication
+    conversation
+    custom
+    grammar
+    level_check
+    orientation
+    reading
+    vocabulary
+    writing
+}
+
+enum Location {
+    CHECKOUT_BUTTON
+    CHECKOUT_TERMS_INFORMATION
+    CHECKOUT_TEST_CHARGE
+    CLASS_A_MONTH
+    CREDITS_EXPIRE
+    CREDITS_RENEW
+    MAIN
+    PACKAGE_DETAIL
+    PACKAGE_PAYMENT_DETAILS
+    PACKAGE_TITLE
+    PRICE_PER_CLASS_SHORT
+    SAVE_PERCENTAGE
+    SECTION_TITLE
+    SUBSCRIPTION_DURATION
+    SUBSCRIPTION_MAIN_TITLE
+    SUBSCRIPTION_NAME
+    SUBSCRIPTION_NEXT_PAYMENT
+    SUBSCRIPTION_PAUSE_PERIOD
+    SUBSCRIPTION_PRICE
+    SUBSCRIPTION_STATUS
+    SUBSCRIPTION_WILL_ACTIVATE_AT
+    SUMMARY_CONTENT
+    SUMMARY_DISCOUNT
+    SUMMARY_PRICE
+    SUMMARY_TITLE
+    SUMMARY_TRIAL_DETAILS
+    TOTAL_PRICE_SHORT
+}
+
+enum MissedStatusReason {
+    emergency
+    forgot
+    late_to_class
+    other
+    technical_issues
+}
+
+enum MoodType {
+    angry
+    average
+    disappointed
+    excellent
+    good
+}
+
+enum PaymentMethod {
+    BankTransfer
+    PayPal
+}
+
+enum PaymentStatus {
+    failed
+    pending
+    successful
+}
+
+enum PracticeItemStatus {
+    completed
+    pending
+}
+
+enum PurchaseType {
+    extra_credits
+    free_to_rolling
+    free_trial
+    legacy
+    marathon
+    monthly
+    non_recurring
+    recurring
+    sprint
+}
+
+enum ReviewMachineProvider {
+    google
+    trustpilot
+}
+
+enum SpokenLanguage {
+    Arabic
+    Chinese
+    Czech
+    Dutch
+    English
+    French
+    German
+    Greek
+    Hungarian
+    Italian
+    Japanese
+    Korean
+    Polish
+    Portuguese
+    Russian
+    Spanish
+    Swedish
+    Thai
+    Turkish
+    Ukrainian
+    Vietnamese
+}
+
+enum Store {
+    internal
+    public
+    test_internal
+}
+
+enum SubscriptionCancelReason {
+    busy
+    cant_use_credits_in_time_available
+    other
+    take_break
+    too_expensive
+}
+
+enum SubscriptionStatus {
+    active
+    cancelled
+    inactive
+    next
+    paused
+    suspended
+}
+
+enum TimeFormat {
+    AMPM
+    ISO8601
+}
+
+enum VocabularyItemWordClassType {
+    adjective
+    adverb
+    noun
+    other
+    phrase
+    verb
+}
+
+enum VocabularyStatus {
+    Completed
+    Uncompleted
+}
+
+"The `DateTime` scalar type represents time data, represented as an ISO-8601 encoded UTC date string."
+scalar DateTime
+
+"Represents a hash map"
+scalar Map
+
+"Special treatment for section.name for BC types on Frontend"
+scalar SectionName
+
+"Represents a hash map with string value"
+scalar StringMap
+
+scalar StringMatrix
+
+scalar Ulid
+
+"""
+
+The `Upload` special type represents a file to be uploaded in the same HTTP request as specified by
+[graphql-multipart-request-spec](https://github.com/jaydenseric/graphql-multipart-request-spec).
+"""
+scalar Upload
+
+scalar Url
+
+input B2GCourseInput {
+    classes: [ClassInput!]
+    course: CourseInput!
+    curriculumName: String!
+    curriculumPoolId: Int!
+    emails: [String!]
+    moduleIds: [Int!]
+    teacherUserId: Int!
+}
+
+input ClassFilterInput {
+    classType: ClassType!
+    daysOfWeek: [Int!]!
+    fromDate: DateTime!
+    fromHour: Int!
+    lessonIds: [Int!]!
+    moduleIds: [Int!]
+    toHour: Int!
+}
+
+input ClassInput {
+    datetime: String!
+    lessonId: Int!
+}
+
+input CourseInput {
+    externalId: String!
+    name: String!
+    type: String!
+}
+
+input LanguageInput {
+    fluency: LanguageFluency!
+    language: SpokenLanguage!
+}
+
+input PriceInput {
+    amount: Int!
+    currency: Currency!
+}
+
+input ProfileInput {
+    aboutMe: String
+    firstName: String
+    lastName: String
+    photo: String
+}
+
+input SubscriptionCancellationFeedbackInput {
+    reason: String!
+    slug: String!
+}
+
+input TeacherAccountSettingsInput {
+    email: String!
+}
+
+input TeacherLanguagesInput {
+    languages: [LanguageInput!]!
+}
+
+input TeacherNotificationSettingsInput {
+    feedback: Boolean!
+    otherClassCancellation: Boolean!
+    shortNoticeCancellation: Boolean!
+}
+
+input UpdatePaymentInfoInput {
+    address: String
+    address2: String
+    bic: String
+    city: String
+    countryCode: CountryCode
+    defaultPaymentMethod: PaymentMethod!
+    iban: String
+    paypal: String
+    postalCode: String
+    state: String
+    vatTaxNumber: String
+}
+
+input UpdateTeacherPreferencesInput {
+    groupClasses: Boolean!
+    privateClasses: Boolean!
+    specializedClasses: Boolean!
+    timeFormat: TimeFormat
+    timezone: String
+    weekStart: Int
+}

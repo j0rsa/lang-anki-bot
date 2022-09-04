@@ -2,21 +2,23 @@
 name = "lang-anki-bot"
 version = "0.1.0"
 authors = ["Aleksandr Bochev <red.avtovo@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 # Config
-dotenv = "0.15.0"
+dotenvy = "0.15"
 
 # IO
-reqwest = { version = "0.11.8", default-features = false, features = ["json", "rustls-tls", "multipart", "cookies"] }
-tokio = { version = "1.15.0", features = ["full"] }
-futures = "0.3.19"
-graphql_client = { version = "0.11.0", features = [ "reqwest" ]}
+reqwest = { version = "0.11.13", default-features = false, features = ["json", "rustls-tls", "multipart", "cookies"] }
+reqwest-retry = "0.2.1"
+reqwest-middleware = "0.2.0"
+tokio = { version = "1.23.0", features = ["full"] }
+futures = "0.3.25"
+graphql_client = { version = "0.12.0", features = [ "reqwest" ]}
 
 # Db
 postgres-types = { version = "0.2.2", features = ["derive", "with-uuid-0_8"] }
-diesel = { version = "2.0.0", features = ["postgres", "r2d2", "uuidv07", "chrono"] }
+diesel = { version = "2.0.2", features = ["postgres", "r2d2", "uuid", "chrono"] }
 diesel_migrations = { version = "2.0.0", features = ["postgres"]}
 uuid = { version = "1.1.2", features = ["serde", "v4"] } #due to the diesel
 r2d2 = { version = "0.8.9" }
@@ -29,10 +31,10 @@ ajson = "0.3.0"
 
 # Logs
 log = "0.4.14"
-env_logger = "0.9.0"
+env_logger = "0.10.0"
 
 #html parser
-scraper = "0.13.0"
+scraper = "0.14.0"
 
 # errors handling
 thiserror = "1.0"
@@ -40,6 +42,10 @@ thiserror = "1.0"
 async-trait = "0.1.52"
 
 telegram-bot = "0.8.0"
+
+# set vendored library dependency, which is used by other libraries
+openssl-sys = { version = "0.9.78", features = ["vendored"] }
+#openssl = { version = "0.10", features = ["vendored"] }
 
 [dev-dependencies]
 test-log = "0.2.8"

@@ -9,31 +9,31 @@ use super::errors::Result;
 
 pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
-pub fn get_token(pool: &Pool, service: &String, login: &String) -> Result<Option<ServiceCredential>> {
-    let connection = pool.get()?;
-    token::table
-        .filter(token::login.eq(login))
-        .filter(token::service.eq(service))
-        .first::<ServiceToken>(&connection)
-        .optional()
-        .map(|token| token.map(|token| token.into()))
-        .map_err(|e| e.into())
-}
+// pub fn get_token(pool: &Pool, service: &String, login: &String) -> Result<Option<ServiceCredential>> {
+//     let connection = pool.get()?;
+//     token::table
+//         .filter(token::login.eq(login))
+//         .filter(token::service.eq(service))
+//         .first::<ServiceToken>(&connection)
+//         .optional()
+//         .map(|token| token.map(|token| token.into()))
+//         .map_err(|e| e.into())
+// }
 
-pub fn save_token(pool: &Pool, service: &String, login: &String, password: &String, token: &ServiceCredential) -> Result<()> {
-    let connection = pool.get()?;
-    let db_token = ServiceToken::from(service, login, password, token);
-    diesel::insert_into(token::table)
-        .values(&db_token)
-        .on_conflict(token::login)
-        .do_update()
-        .set(&db_token)
-        .execute(&connection)?;
-    Ok(())
-}
+// pub fn save_token(pool: &Pool, service: &String, login: &String, password: &String, token: &ServiceCredential) -> Result<()> {
+//     let connection = pool.get()?;
+//     let db_token = ServiceToken::from(service, login, password, token);
+//     diesel::insert_into(token::table)
+//         .values(&db_token)
+//         .on_conflict(token::login)
+//         .do_update()
+//         .set(&db_token)
+//         .execute(&connection)?;
+//     Ok(())
+// }
 
 #[derive(Insertable, Queryable, AsChangeset, Clone, Debug)]
-#[table_name = "token"]
+#[diesel(table_name = token)]
 struct ServiceToken {
     pub id: uuid::Uuid,
     pub service: String,
