@@ -64,6 +64,7 @@ mod test {
 
     #[tokio::test]
     async fn lingoda_to_anki() -> Result<(), Box<dyn Error>> {
+        dotenv::dotenv().ok();
         let anki = Anki::new(env::var("ANKI_URL").expect("No Anki URL specified"));
         let deck = env::var("ANKI_DECK").expect("No Deck specified");
         let cred = ServiceCredential::no_token_new(
