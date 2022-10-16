@@ -5,8 +5,8 @@ pub(crate) mod errors;
 pub mod upstream;
 // pub(crate) mod db_config;
 // pub(crate) mod repository;
-pub mod models;
 pub(crate) mod actions;
+pub mod models;
 
 pub(crate) fn curr_millis() -> u128 {
     let now = std::time::SystemTime::now();

@@ -1,20 +1,19 @@
+use crate::lib::downstream::anki_cloze_note::AnkiClozable;
+use crate::lib::upstream::lingoda::vocabulary_items::VocabularyItemsVocabularyItems;
+use crate::{Anki, Lingoda, Note, ServiceCredential};
 use std::error::Error;
 use std::thread;
 use std::time::Duration;
-use crate::{Anki, Lingoda, Note, ServiceCredential};
-use crate::lib::upstream::lingoda::vocabulary_items::VocabularyItemsVocabularyItems;
-use crate::lib::downstream::anki_cloze_note::AnkiClozable;
 
 pub(crate) async fn lingoda_to_anki(
     lingoda: &Lingoda,
     anki: &Anki,
     deck: &String,
     cred: Box<ServiceCredential>,
-    lesson_id: i64
+    lesson_id: i64,
 ) -> Result<(), Box<dyn Error>> {
-    let words: Vec<VocabularyItemsVocabularyItems> = lingoda
-        .get_lesson_words(cred, lesson_id)
-        .await?;
+    let words: Vec<VocabularyItemsVocabularyItems> =
+        lingoda.get_lesson_words(cred, lesson_id).await?;
     let anki_notes = words
         .iter()
         .map(|w| w.to_cloze(deck))

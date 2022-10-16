@@ -11,21 +11,23 @@ extern crate diesel_migrations;
 // tested without any outside setup of the database.
 // embed_migrations!();
 
-use std::borrow::Borrow;
-use lib::downstream::anki::*;
-use futures::StreamExt;
-use std::env;
-use std::error::Error;
-use telegram_bot::{Api, CanSendMessage, Integer, Message, MessageKind, ToSourceChat, UpdateKind, UserId};
 use crate::lib::actions;
 use crate::lib::models::service_credential::ServiceCredential;
 use crate::lib::upstream::lingoda::Lingoda;
+use futures::StreamExt;
+use lib::downstream::anki::*;
+use std::borrow::Borrow;
+use std::env;
+use std::error::Error;
+use telegram_bot::{
+    Api, CanSendMessage, Integer, Message, MessageKind, ToSourceChat, UpdateKind, UserId,
+};
 // use crate::lib::db_config::DbConfig;
 // use crate::lib::repository::{get_token, save_token};
 // use diesel_migrations::RunMigrationsError;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>>{
+async fn main() -> Result<(), Box<dyn Error>> {
     env_logger::init();
     dotenvy::dotenv().ok();
 
@@ -49,13 +51,12 @@ async fn main() -> Result<(), Box<dyn Error>>{
         .parse::<Integer>()
         .expect("Allowed user id should be a number");
 
-
-    let pack = LangPack{
+    let pack = LangPack {
         anki: Box::new(anki),
         deck: Box::new(deck),
         service_credentials: Box::new(cred),
         lingoda: Box::new(lingoda),
-        allowed_user: UserId::new(allowed_user)
+        allowed_user: UserId::new(allowed_user),
     };
 
     let token = env::var("TELEGRAM_BOT_TOKEN").expect("TELEGRAM_BOT_TOKEN not set");
@@ -64,14 +65,12 @@ async fn main() -> Result<(), Box<dyn Error>>{
     while let Some(update) = stream.next().await {
         let update = update?;
         match update.kind {
-            UpdateKind::Message(ref message) => {
-                match message.kind {
-                    MessageKind::Text {ref data, .. } => {
-                        process_message(api.clone(), &pack,  &message ,data.clone()).await;
-                    }
-                    _ => {}
+            UpdateKind::Message(ref message) => match message.kind {
+                MessageKind::Text { ref data, .. } => {
+                    process_message(api.clone(), &pack, &message, data.clone()).await;
                 }
-            }
+                _ => {}
+            },
             _ => {}
         }
     }
@@ -86,42 +85,41 @@ struct LangPack {
     allowed_user: UserId,
 }
 
-async fn process_message(
-    api: Api,
-    pack: &LangPack,
-    message: &Message,
-    text: String,
-) {
+async fn process_message(api: Api, pack: &LangPack, message: &Message, text: String) {
     if message.from.id != pack.allowed_user {
-        api.send(
-            message.to_source_chat()
-                .text(format!("Sorry, I cant talk to you. Your id({}) is not in allow list", message.from.id)),
-        ).await.expect("Unable to send message");
+        api.send(message.to_source_chat().text(format!(
+            "Sorry, I cant talk to you. Your id({}) is not in allow list",
+            message.from.id
+        )))
+        .await
+        .expect("Unable to send message");
         return;
     }
     if text.starts_with("lingoda lesson ") {
         let id_res = get_lesson_id(text);
         match id_res {
             Ok(id) => {
-                process_lingoda_lesson(api, pack, message, id).await
+                process_lingoda_lesson(api, pack, message, id)
+                    .await
                     .expect("Unable to process lingoda lesson request");
-            },
+            }
             _ => {
                 api.send(
-                    message.to_source_chat()
+                    message
+                        .to_source_chat()
                         .text("Sorry, I didn't get it. Try typing 'lingoda lesson <number>'"),
-                ).await.expect("Unable to send message");
+                )
+                .await
+                .expect("Unable to send message");
                 return;
             }
         }
-
     }
 }
 
-fn get_lesson_id(string: String) -> Result<i64,()> {
+fn get_lesson_id(string: String) -> Result<i64, ()> {
     if let Some(id_string) = string.get(15..string.len()) {
-        id_string.trim().parse::<i64>()
-            .map_err( |_| () )
+        id_string.trim().parse::<i64>().map_err(|_| ())
     } else {
         Err(())
     }
@@ -138,18 +136,26 @@ async fn process_lingoda_lesson(
         pack.anki.borrow(),
         pack.deck.borrow(),
         pack.service_credentials.clone(),
-        lesson_id
-    ).await {
+        lesson_id,
+    )
+    .await
+    {
         Ok(()) => api.send(message.to_source_chat().text("Done! 😊")),
-        Err(ref err) => api.send(message.to_source_chat().text(format!("Oh no, the error occurred: {}", err)))
-    }.await.expect("Unable to send a lingoda lesson message!");
+        Err(ref err) => api.send(
+            message
+                .to_source_chat()
+                .text(format!("Oh no, the error occurred: {}", err)),
+        ),
+    }
+    .await
+    .expect("Unable to send a lingoda lesson message!");
     Ok(())
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::lib::downstream::anki_cloze_note::{AnkiClozable};
+    use crate::lib::downstream::anki_cloze_note::AnkiClozable;
     use crate::lib::models::service_credential::ServiceCredential;
     use crate::lib::upstream::lingoda::Lingoda;
     use std::error::Error;
@@ -202,9 +208,17 @@ mod test {
     fn lingoda_id_test() {
         assert_eq!(get_lesson_id("lingoda lesson 123".to_owned()), Ok(123));
         assert_eq!(get_lesson_id("lingoda lesson   123   ".to_owned()), Ok(123));
-        assert_eq!(get_lesson_id("lingoda lesson:   123   ".to_owned()), Ok(123));
-        assert_eq!(get_lesson_id("lingoda lesson=   123   ".to_owned()), Ok(123));
-        assert_eq!(get_lesson_id("lingoda lesson= some  123   ".to_owned()), Err(()));
-
+        assert_eq!(
+            get_lesson_id("lingoda lesson:   123   ".to_owned()),
+            Ok(123)
+        );
+        assert_eq!(
+            get_lesson_id("lingoda lesson=   123   ".to_owned()),
+            Ok(123)
+        );
+        assert_eq!(
+            get_lesson_id("lingoda lesson= some  123   ".to_owned()),
+            Err(())
+        );
     }
 }
