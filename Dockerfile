@@ -48,7 +48,7 @@ SHELL ["/bin/bash", "-c"]
 RUN DEP_NAME=${BINARY_NAME//-/_} \
     rm -f target/${RUST_TARGET}/release/deps/${DEP_NAME}*
 
-COPY . .
+COPY src .
 RUN cargo build --release --target=${RUST_TARGET}
 
 
