@@ -38,8 +38,8 @@ ARG BINARY_NAME
 
 COPY Cargo.toml Cargo.toml
 
-RUN echo 'fn main() {println!("if you see this, the build broke")}' > src/main.rs && \
-    cargo build --release --target=${RUST_TARGET}
+RUN echo 'fn main() {println!("if you see this, the build broke")}' > src/main.rs
+RUN cargo build --release --target=${RUST_TARGET}
 
 # Ubuntu uses dash as default sh by default
 SHELL ["/bin/bash", "-c"]
