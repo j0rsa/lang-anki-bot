@@ -12,40 +12,34 @@ pub enum Error {
     #[error("IO error")]
     ReqwestIo {
         #[from]
-        source: reqwest::Error
+        source: reqwest::Error,
     },
 
     #[error("Http parsing error: {message}")]
-    HttpParsingError {
-        message: &'static str
-    },
+    HttpParsingError { message: &'static str },
 
     #[error("There was a server error: {message}")]
-    ServerError {
-        message: &'static str
-    },
+    ServerError { message: &'static str },
 
     #[error("There was a user error: {message}")]
-    UserError {
-        message: &'static str
-    },
+    UserError { message: &'static str },
 
     #[error("Deserialization error: {e}\n{message}")]
     DeserializationError {
         e: serde_json::Error,
-        message: String
+        message: String,
     },
 
     #[error("Db error: {source}")]
     DbError {
         #[from]
-        source: r2d2::Error
+        source: r2d2::Error,
     },
 
     #[error("Db error: {source}")]
     DieselError {
         #[from]
-        source: diesel::result::Error
+        source: diesel::result::Error,
     },
 
     #[error(transparent)]
