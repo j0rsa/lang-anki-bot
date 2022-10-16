@@ -33,7 +33,7 @@ pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 // }
 
 #[derive(Insertable, Queryable, AsChangeset, Clone, Debug)]
-#[table_name = "token"]
+#[diesel(table_name = token)]
 struct ServiceToken {
     pub id: uuid::Uuid,
     pub service: String,

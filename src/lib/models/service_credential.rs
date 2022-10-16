@@ -1,12 +1,10 @@
-use std::fmt;
 use crate::lib::curr_millis;
-use crate::schema::token::value;
 
 #[derive(Debug, Clone)]
 pub struct ServiceCredential {
     pub username: String,
     pub password: String,
-    pub token: Option<Token>
+    pub token: Option<Token>,
 }
 
 #[derive(Debug, Clone)]
@@ -26,37 +24,36 @@ impl ServiceCredential {
         Self {
             username: username.to_string(),
             password: password.to_string(),
-            token: None
+            token: None,
         }
     }
     pub fn new(username: String, password: String, token: String, expires_ms: u128) -> Self {
         Self {
             username,
             password,
-            token: Some(Token{
+            token: Some(Token {
                 value: token,
-                expires_ms
-            })
+                expires_ms,
+            }),
         }
     }
 
+    #[allow(dead_code)]
     pub(crate) fn new_token(self, token: String, expires_at_ms: u128) -> Self {
-        Self{
+        Self {
             username: self.username.clone(),
             password: self.password.clone(),
-            token: Some(Token{
+            token: Some(Token {
                 value: token,
                 expires_ms: expires_at_ms,
-            })
+            }),
         }
     }
 
     pub fn is_expired(&self) -> bool {
         match self.token {
-            Some(ref token) => {
-                curr_millis() > token.expires_ms
-            }
-            None => true
+            Some(ref token) => curr_millis() > token.expires_ms,
+            None => true,
         }
     }
 }

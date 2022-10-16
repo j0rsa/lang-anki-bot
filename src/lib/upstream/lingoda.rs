@@ -1,24 +1,19 @@
-use std::borrow::BorrowMut;
+use crate::lib::downstream::anki_cloze_note::{AnkiClozable, AnkiClozeNote};
+use crate::lib::models::service_credential::ServiceCredential;
+use crate::lib::upstream::lingoda::vocabulary_items::VocabularyItemsVocabularyItems;
+use futures::TryFutureExt;
+use graphql_client::reqwest::post_graphql;
+use graphql_client::GraphQLQuery;
+use reqwest::cookie::{CookieStore, Jar};
+use reqwest::Url;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::error::Error;
 use std::sync::Arc;
-use futures::TryFutureExt;
-use reqwest::cookie::{CookieStore, Jar};
-use reqwest::Url;
-use crate::lib::models::service_credential::ServiceCredential;
-use crate::Options;
-use crate::schema::token::expires_at;
-use serde::{Serialize, Deserialize};
-use tokio::io::split;
-use graphql_client::GraphQLQuery;
-use graphql_client::reqwest::post_graphql;
-use crate::lib::downstream::anki_cloze_note::{AnkiClozable, AnkiClozeNote};
-use crate::lib::upstream::lingoda::vocabulary_items::VocabularyItemsVocabularyItems;
 
 pub struct Lingoda {
     jar: Arc<Jar>,
     client: reqwest::Client,
-
 }
 
 impl Lingoda {
@@ -30,53 +25,67 @@ impl Lingoda {
                 .cookie_store(true)
                 .cookie_provider(Arc::clone(&jar))
                 .build()
-                .unwrap()
+                .unwrap(),
         }
     }
 
     async fn collect_cookies(&self) -> Result<(), reqwest::Error> {
         let res = self.client.get("https://learn.lingoda.com/").send().await;
-        res.map(|_|())
+        res.map(|_| ())
     }
 
-    async fn login(&self, service_credential: ServiceCredential) -> Result<ServiceCredential, reqwest::Error> {
+    async fn login(
+        &self,
+        service_credential: ServiceCredential,
+    ) -> Result<ServiceCredential, reqwest::Error> {
         self.collect_cookies()
-        .and_then(|_|{
-            let login = LoginRequest::new(&service_credential.username, &service_credential.password);
-            self.client.post("https://learn.lingoda.com/login_check")
-                .json(&login)
-                .send()
-        }).await
-        .and_then(|response| {
-            let cookie_strings = self.jar.cookies(&Url::parse("https://learn.lingoda.com").unwrap())
-                .unwrap()
-                .to_str().unwrap()
-                .split("; ")
-                .map(|s| s.to_string())
-                .collect::<Vec<_>>();
-            let cookies: HashMap<String, String> = cookie_strings.iter()
-                .map(|s| {
-                    let parts: Vec<String> = s.split("=").map(|s| s.to_string()).collect();
-                    (parts[0].to_string(), parts[1].to_string())
-                })
-                .collect();
-            let token = cookies.get("BEARER").unwrap().to_string();
-            let exp = cookies.get("BEARER_EXP").unwrap().to_string();
-            Ok(ServiceCredential::new(
-                service_credential.username,
-                service_credential.password,
-                token,
-                exp.parse::<u128>().unwrap() * 1000,
-            ))
-        })
+            .and_then(|_| {
+                let login =
+                    LoginRequest::new(&service_credential.username, &service_credential.password);
+                self.client
+                    .post("https://learn.lingoda.com/login_check")
+                    .json(&login)
+                    .send()
+            })
+            .await
+            .and_then(|_| {
+                let cookie_strings = self
+                    .jar
+                    .cookies(&Url::parse("https://learn.lingoda.com").unwrap())
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .split("; ")
+                    .map(|s| s.to_string())
+                    .collect::<Vec<_>>();
+                let cookies: HashMap<String, String> = cookie_strings
+                    .iter()
+                    .map(|s| {
+                        let parts: Vec<String> = s.split("=").map(|s| s.to_string()).collect();
+                        (parts[0].to_string(), parts[1].to_string())
+                    })
+                    .collect();
+                let token = cookies.get("BEARER").unwrap().to_string();
+                let exp = cookies.get("BEARER_EXP").unwrap().to_string();
+                Ok(ServiceCredential::new(
+                    service_credential.username,
+                    service_credential.password,
+                    token,
+                    exp.parse::<u128>().unwrap() * 1000,
+                ))
+            })
     }
 
-    pub async fn get_lesson_words(&self, mut cred: Box<ServiceCredential>, id: i64) -> Result<Vec<VocabularyItemsVocabularyItems>, Box<dyn Error>> {
+    pub async fn get_lesson_words(
+        &self,
+        mut cred: Box<ServiceCredential>,
+        id: i64,
+    ) -> Result<Vec<VocabularyItemsVocabularyItems>, Box<dyn Error>> {
         if cred.is_expired() {
             let old_cred = cred.clone().as_ref().clone();
             cred = Box::new(self.login(old_cred).await?);
         }
-        let variables = vocabulary_items::Variables{
+        let variables = vocabulary_items::Variables {
             learning_unit_id: None,
             lesson_ids: vec![id],
         };
@@ -88,17 +97,24 @@ impl Lingoda {
             .default_headers(
                 std::iter::once((
                     reqwest::header::AUTHORIZATION,
-                    reqwest::header::HeaderValue::from_str(&format!("Bearer {}", token))
-                        .unwrap(),
+                    reqwest::header::HeaderValue::from_str(&format!("Bearer {}", token)).unwrap(),
                 ))
-                    .collect(),
+                .collect(),
             )
             .build()?;
 
-        let response_body =
-            post_graphql::<vocabularyItems, _>(&client, "https://learn.lingoda.com/graphql", variables).await.unwrap();
+        let response_body = post_graphql::<vocabularyItems, _>(
+            &client,
+            "https://learn.lingoda.com/graphql",
+            variables,
+        )
+        .await
+        .unwrap();
         // println!("{:?}", response_body);
-        Ok(response_body.data.expect("missing response data").vocabulary_items)
+        Ok(response_body
+            .data
+            .expect("missing response data")
+            .vocabulary_items)
     }
 }
 
@@ -107,7 +123,7 @@ impl Lingoda {
 #[graphql(
     schema_path = "resources/lingoda_schema.graphql",
     query_path = "resources/vocabulary_items_query.graphql",
-    response_derives = "Debug",
+    response_derives = "Debug"
 )]
 pub struct vocabularyItems;
 
@@ -125,11 +141,13 @@ pub(crate) struct ResponseData {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct ResponseItem {
-    gender: Option<String>, // feminine
+    gender: Option<String>,
+    // feminine
     id: uuid::Uuid,
     #[serde(rename = "item")]
     en_translation: String,
-    title: String, // orig DE word
+    title: String,
+    // orig DE word
     plural: Option<String>,
     sample_sentence_one: String,
     word_class: Option<String>,
@@ -158,16 +176,12 @@ impl LoginRequest {
 impl AnkiClozable for VocabularyItemsVocabularyItems {
     fn to_cloze(&self, deck_name: &String) -> AnkiClozeNote {
         let translation = match self.item {
-            Some(ref item) => {
-                item.clone()
-            }
-            None => "".to_string()
+            Some(ref item) => item.clone(),
+            None => "".to_string(),
         };
-        let text = format!("{}<br/><br/>- {}<br/><br/>{{{{c1::{}}}}}<br/>{{{{c1::{}}}}}",
-                           self.test_question,
-                           translation,
-                           self.title,
-                           self.sample_sentence_one
+        let text = format!(
+            "{}<br/><br/>- {}<br/><br/>{{{{c1::{}}}}}<br/>{{{{c1::{}}}}}",
+            self.test_question, translation, self.title, self.sample_sentence_one
         );
         AnkiClozeNote::new(deck_name.clone(), text, None, None)
     }
@@ -175,8 +189,8 @@ impl AnkiClozable for VocabularyItemsVocabularyItems {
 
 #[cfg(test)]
 mod tests {
-    use std::env;
     use super::*;
+    use std::env;
 
     #[tokio::test]
     async fn test_cookies_collection() {
@@ -186,10 +200,15 @@ mod tests {
 
     #[tokio::test]
     async fn test_login() {
+        dotenvy::dotenv().ok();
         let lingoda = Lingoda::new();
         let cred = ServiceCredential::no_token_new(
-            env::var("LINGODA_USER").expect("No username specified").as_ref(),
-            env::var("LINGODA_PASSWORD").expect("No password specified").as_ref(),
+            env::var("LINGODA_USER")
+                .expect("No username specified")
+                .as_ref(),
+            env::var("LINGODA_PASSWORD")
+                .expect("No password specified")
+                .as_ref(),
         );
         let token = lingoda.login(cred).await.unwrap().token;
         assert!(token.is_some());
@@ -216,10 +235,15 @@ mod tests {
     /// ]
     #[tokio::test]
     async fn test_get_lesson_words() {
+        dotenvy::dotenv().ok();
         let lingoda = Lingoda::new();
         let cred = ServiceCredential::no_token_new(
-            env::var("LINGODA_USER").expect("No username specified").as_ref(),
-            env::var("LINGODA_PASSWORD").expect("No password specified").as_ref(),
+            env::var("LINGODA_USER")
+                .expect("No username specified")
+                .as_ref(),
+            env::var("LINGODA_PASSWORD")
+                .expect("No password specified")
+                .as_ref(),
         );
         let res = lingoda.get_lesson_words(Box::new(cred), 4492).await;
         println!("{:#?}", res);

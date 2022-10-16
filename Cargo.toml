@@ -2,16 +2,16 @@
 name = "lang-anki-bot"
 version = "0.1.0"
 authors = ["Aleksandr Bochev <red.avtovo@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 # Config
-dotenv = "0.15.0"
+dotenvy = "0.15"
 
 # IO
 reqwest = { version = "0.11.8", default-features = false, features = ["json", "rustls-tls", "multipart", "cookies"] }
 tokio = { version = "1.15.0", features = ["full"] }
-futures = "0.3.19"
+futures = "0.3.24"
 graphql_client = { version = "0.11.0", features = [ "reqwest" ]}
 
 # Db
