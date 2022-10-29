@@ -13,7 +13,7 @@ ARG RUST_TARGET=x86_64-unknown-linux-gnu
 
 # Inspired by https://github.com/skerkour/black-hat-rust/blob/main/ch_12/rat/docker/Dockerfile.aarch64
 FROM base as base-arm64
-ARG RUST_TARGET=aarch64-unknown-linux-gnu
+ARG RUST_TARGET=aarch64-unknown-musl-gnu
 RUN apt install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross && \
     rustup target add $RUST_TARGET
 ENV CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
