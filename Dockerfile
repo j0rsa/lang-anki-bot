@@ -1,4 +1,7 @@
 ARG BINARY_NAME=app
+ARG RUST_TARGET_AMD64=x86_64-unknown-linux-musl
+ARG RUST_TARGET_ARM32=armv7-unknown-linux-gnueabihf
+ARG RUST_TARGET_ARM64=aarch64-unknown-linux-gnu
 
 # --------------- PREPARE BUILDER ENV ------------------------------------------
 FROM rust:latest as base
@@ -8,12 +11,14 @@ RUN apt update && \
 WORKDIR /app
 
 FROM base as base-amd64
-ARG RUST_TARGET=x86_64-unknown-linux-musl
-# RUN rustup target add $RUST_TARGET
+ARG RUST_TARGET_AMD64
+ARG RUST_TARGET=$RUST_TARGET_AMD64
+RUN rustup target add $RUST_TARGET
 
 # Inspired by https://github.com/skerkour/black-hat-rust/blob/main/ch_12/rat/docker/Dockerfile.aarch64
 FROM base as base-arm64
-ARG RUST_TARGET=aarch64-unknown-linux-gnu
+ARG RUST_TARGET_ARM64
+ARG RUST_TARGET=$RUST_TARGET_ARM64
 RUN apt install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross && \
     rustup target add $RUST_TARGET
 ENV CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
@@ -21,10 +26,12 @@ ENV CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
     CXX_aarch64_unknown_linux_gnu=aarch64-linux-gnu-g++
 
 FROM base as base-arm32
-ARG RUST_TARGET=armv7-unknown-linux-gnueabihf
+ARG RUST_TARGET_ARM32
+ARG RUST_TARGET=$RUST_TARGET_ARM32
+ENV RUST_TARGET=$RUST_TARGET
 RUN apt install -y g++-arm-linux-gnueabihf libc6-dev-armhf-cross && \
     rustup target add $RUST_TARGET && \
-    rustup toolchain install stable-armv7-unknown-linux-gnueabihf
+    rustup toolchain install stable-$RUST_TARGET
 ENV CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc \
     CC_armv7_unknown_linux_gnueabihf=arm-linux-gnueabihf-gcc \
     CXX_armv7_unknown_linux_gnueabihf=arm-linux-gnueabihf-g++
@@ -59,13 +66,16 @@ ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 ENV SSL_CERT_DIR=/etc/ssl/certs
 
 FROM runbase as runbase-amd64
-ARG RUST_TARGET=x86_64-unknown-linux-musl
+ARG RUST_TARGET_AMD64
+ARG RUST_TARGET=$RUST_TARGET_AMD64
 
 FROM runbase as runbase-arm64
-ARG RUST_TARGET=aarch64-unknown-linux-gnu
+ARG RUST_TARGET_ARM64
+ARG RUST_TARGET=$RUST_TARGET_ARM64
 
 FROM runbase as runbase-arm32
-ARG RUST_TARGET=armv7-unknown-linux-gnueabihf
+ARG RUST_TARGET_ARM32
+ARG RUST_TARGET=$RUST_TARGET_ARM32
 # --------------- END OF PREPARATION ------------------------------------------
 
 #Runner with ssl support
