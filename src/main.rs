@@ -46,17 +46,23 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .as_ref(),
     );
     let lingoda = Lingoda::new();
-    let allowed_user = env::var("TELEGRAM_ALLOWED_USER")
+    let allowed_user_ids = env::var("TELEGRAM_ALLOWED_USERS")
         .expect("No allowed user specified")
-        .parse::<Integer>()
-        .expect("Allowed user id should be a number");
+        .split(",")
+        .map(|x| x.parse::<Integer>().expect("Invalid allowed user id"))
+        .collect::<Vec<Integer>>();
+
+    let allowed_users = allowed_user_ids
+        .iter()
+        .map(|user| UserId::new(user.to_owned()))
+        .collect::<Vec<UserId>>();
 
     let pack = LangPack {
         anki: Box::new(anki),
         deck: Box::new(deck),
         service_credentials: Box::new(cred),
         lingoda: Box::new(lingoda),
-        allowed_user: UserId::new(allowed_user),
+        allowed_users,
     };
 
     let token = env::var("TELEGRAM_BOT_TOKEN").expect("TELEGRAM_BOT_TOKEN not set");
@@ -82,11 +88,11 @@ struct LangPack {
     deck: Box<String>,
     service_credentials: Box<ServiceCredential>,
     lingoda: Box<Lingoda>,
-    allowed_user: UserId,
+    allowed_users: Vec<UserId>,
 }
 
 async fn process_message(api: Api, pack: &LangPack, message: &Message, text: String) {
-    if message.from.id != pack.allowed_user {
+    if !pack.allowed_users.contains(&message.from.id) {
         api.send(message.to_source_chat().text(format!(
             "Sorry, I cant talk to you. Your id({}) is not in allow list",
             message.from.id
