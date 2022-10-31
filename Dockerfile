@@ -22,7 +22,8 @@ WORKDIR /app
 FROM base as base-amd64
 ARG RUST_TARGET_AMD64
 ENV RUST_TARGET=$RUST_TARGET_AMD64
-RUN rustup target add $RUST_TARGET
+RUN rustup target add $RUST_TARGET &&\
+    apt install -y musl-tools musl-dev
 
 WORKDIR /app
 
