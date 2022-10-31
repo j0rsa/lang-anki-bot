@@ -23,12 +23,11 @@ FROM base as base-amd64
 ARG RUST_TARGET_AMD64
 ENV RUST_TARGET=$RUST_TARGET_AMD64
 RUN rustup target add $RUST_TARGET &&\
-    rustup toolchain install stable-$RUST_TARGET &&\
     apt install -y \
     # musl compiler
     musl-tools musl-dev \
     # cc linker fix -> https://stackoverflow.com/questions/66556519/cannot-compile-rust-project-linking-with-cc-failed
-    gcc-multilib
+    gcc-multilib gcc libpq5
 ENV LDFLAGS=-lpthread \
     OPENSSL_DIR=/usr/local/musl
 WORKDIR /app
