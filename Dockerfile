@@ -23,7 +23,11 @@ FROM base as base-amd64
 ARG RUST_TARGET_AMD64
 ENV RUST_TARGET=$RUST_TARGET_AMD64
 RUN rustup target add $RUST_TARGET &&\
-    apt install -y musl-tools musl-dev
+    apt install -y \
+    # musl compiler
+    musl-tools musl-dev \
+    # cc linker fix -> https://stackoverflow.com/questions/66556519/cannot-compile-rust-project-linking-with-cc-failed
+    gcc-multilib
 
 WORKDIR /app
 
@@ -61,7 +65,7 @@ FROM base-$TARGETARCH AS final-builder
 
 COPY . .
 
-RUN cargo build --release --target=${RUST_TARGET}
+RUN cargo build --release --target=$RUST_TARGET
 
 
 # -----------------------------------------------------------------------
