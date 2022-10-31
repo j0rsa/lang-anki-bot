@@ -2,7 +2,7 @@ ARG BINARY_NAME=app
 ARG RUST_TARGET_AMD64=x86_64-unknown-linux-musl
 ARG RUST_TARGET_ARM32=armv7-unknown-linux-gnueabihf
 ARG RUST_TARGET_ARM64=aarch64-unknown-linux-gnu
-ARG RUNBASE_VERSION=22.04
+ARG RUNBASE_VERSION=3.16.2
 
 # -----------------------------------------------------------------------
 # ------------      BUILDER BASE    -------------------------------------
@@ -29,7 +29,7 @@ RUN rustup target add $RUST_TARGET &&\
     musl-tools musl-dev \
     # cc linker fix -> https://stackoverflow.com/questions/66556519/cannot-compile-rust-project-linking-with-cc-failed
     gcc-multilib
-
+ENV LDFLAGS=-lpthread
 WORKDIR /app
 
 # -->> ARM 64 <<--
@@ -66,50 +66,20 @@ FROM base-$TARGETARCH AS final-builder
 
 COPY . .
 
-RUN cargo build --release --target=$RUST_TARGET
+RUN cargo install --release --target=$RUST_TARGET
 
 
 # -----------------------------------------------------------------------
-# ------------      RUNNER  BASE    -------------------------------------
+# ------------        RUNNER        -------------------------------------
 # -----------------------------------------------------------------------
-FROM ubuntu:$RUNBASE_VERSION as runbase
-
-# -----------------------------------------------------------------------
-# ------------     PLATFORM RUNNERS      --------------------------------
-# -----------------------------------------------------------------------
-FROM runbase as runbase-amd64
-ARG RUST_TARGET_AMD64
-ARG RUST_TARGET=$RUST_TARGET_AMD64
-#         What is present                   What is missing
-RUN ln -s /lib/x86_64-linux-gnu/libssl.so.3 /lib/x86_64-linux-gnu/libssl.so.1.1 &&\
-    ln -s /lib/x86_64-linux-gnu/libcrypto.so.3 /lib/x86_64-linux-gnu/libcrypto.so.1.1 &&\
-    apt update && apt install -y libpq5 openssl
-
-
-FROM runbase as runbase-arm64
-ARG RUST_TARGET_ARM64
-ARG RUST_TARGET=$RUST_TARGET_ARM64
-
-FROM runbase as runbase-arm32
-ARG RUST_TARGET_ARM32
-ARG RUST_TARGET=$RUST_TARGET_ARM32
-
-
-# -----------------------------------------------------------------------
-# ------------      FINAL RUNNER    -------------------------------------
-# -----------------------------------------------------------------------
-#                /   Amd64 runner   \
-#   Base runner  -   Arm64 runner   ------------------- Final runner
-#                \   Arm32 runner   /                 /
-#                                      Final buider  /
+FROM alpine:$RUNBASE_VERSION
 #Runner with ssl support
-FROM runbase-$TARGETARCH
 
 # Declare args in the runner scope to be able to use it
 ARG BINARY_NAME
 LABEL authors="red.avtovo@gmail.com"
 
-COPY --from=final-builder /app/target/${RUST_TARGET}/release/${BINARY_NAME} /opt/
+COPY --from=final-builder /usr/local/cargo/bin/${BINARY_NAME} /opt/
 
 ENV RUST_LOG="info"
 ENV BINARY_NAME=${BINARY_NAME}
