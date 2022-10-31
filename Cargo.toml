@@ -41,5 +41,8 @@ async-trait = "0.1.52"
 
 telegram-bot = "0.8.0"
 
+# set vendored library dependency, which is used by other libraries
+openssl-sys = { version = "0.9.77", features = ["vendored"] }
+
 [dev-dependencies]
 test-log = "0.2.8"

@@ -49,7 +49,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let allowed_user_ids = env::var("TELEGRAM_ALLOWED_USERS")
         .expect("No allowed user specified")
         .split(",")
-        .map(|x| x.parse::<Integer>().expect("Invalid allowed user id"))
+        .map(|x| x.parse().expect("Invalid allowed user id"))
         .collect::<Vec<Integer>>();
 
     let allowed_users = allowed_user_ids
@@ -202,7 +202,7 @@ mod test {
                 .await
                 .expect("Failed to add note to anki");
             // println!("Added note: {:?}", response);
-            thread::sleep(Duration::from_millis(400));
+            thread::sleep(Duration::from_millis(1200));
         }
 
         anki.sync().await.expect("Failed to sync anki");

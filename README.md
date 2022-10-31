@@ -1,4 +1,4 @@
-
+# Lang Anki Bot
 
 ## Getting graphql schema
 
@@ -10,3 +10,13 @@
 Convert json to graphql
 
 https://transform.tools/json-to-graphql
+
+## Local build
+
+    docker buildx build \
+          --progress=plain \
+          --platform linux/amd64 \
+          --build-arg BINARY_NAME=lang-anki-bot \
+          --tag lang-anki-bot:latest \
+          .
+    docker run --rm -it lang-anki-bot sh

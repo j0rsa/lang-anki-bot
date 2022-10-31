@@ -101,6 +101,7 @@ impl Anki {
             .map_err(|e| Error::Reqwest { e, path })
     }
 
+    #[allow(dead_code)]
     pub async fn get_decks(&self) -> Result<Vec<String>> {
         let data = ShortAction {
             version: 6,
