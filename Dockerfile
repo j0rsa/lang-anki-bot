@@ -67,7 +67,7 @@ FROM base-$TARGETARCH AS final-builder
 
 COPY . .
 
-RUN cargo install --target=$RUST_TARGET
+RUN cargo install --target=$RUST_TARGET --path .
 
 
 # -----------------------------------------------------------------------
