@@ -23,6 +23,7 @@ FROM base as base-amd64
 ARG RUST_TARGET_AMD64
 ENV RUST_TARGET=$RUST_TARGET_AMD64
 RUN rustup target add $RUST_TARGET &&\
+    rustup toolchain install stable-$RUST_TARGET &&\
     apt install -y \
     # musl compiler
     musl-tools musl-dev \
