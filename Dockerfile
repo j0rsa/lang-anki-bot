@@ -29,7 +29,8 @@ RUN rustup target add $RUST_TARGET &&\
     musl-tools musl-dev \
     # cc linker fix -> https://stackoverflow.com/questions/66556519/cannot-compile-rust-project-linking-with-cc-failed
     gcc-multilib
-ENV LDFLAGS=-lpthread
+ENV LDFLAGS=-lpthread \
+    OPENSSL_DIR=/usr/local/musl
 WORKDIR /app
 
 # -->> ARM 64 <<--
@@ -66,7 +67,7 @@ FROM base-$TARGETARCH AS final-builder
 
 COPY . .
 
-RUN cargo install --release --target=$RUST_TARGET
+RUN cargo install --target=$RUST_TARGET
 
 
 # -----------------------------------------------------------------------
