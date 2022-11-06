@@ -313,6 +313,30 @@ mod tests {
     }
 
     #[test]
+    fn masked_text_v2_test_2() {
+        let item = VocabularyItemsVocabularyItems{
+            cefr_level: VocabularyItemsVocabularyItemsCefrLevel {
+                name: "B1".to_string(),
+            },
+            gender: None,
+            item: Some("How boring!".to_string()),
+            sample_sentence_one: "Wie langweilig der Film sein kann!".to_string(),
+            test_question: "________________ der Film sein kann!".to_string(),
+            title: "Wie langweilig!".to_string(),
+            word_class: VocabularyItemWordClassType::phrase,
+        };
+        let expected_text = "\
+        {{c1::Wie langweilig}} der Film sein kann!<br/>\
+        <br/>\
+        - How boring!\
+        ";
+
+        let text_v2 = masked_text_v2(&item);
+        assert!(text_v2.is_some());
+        assert_eq!(text_v2.unwrap(), expected_text)
+    }
+
+    #[test]
     fn masked_text_v2_test_fail() {
         let item = VocabularyItemsVocabularyItems{
             cefr_level: VocabularyItemsVocabularyItemsCefrLevel {
