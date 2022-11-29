@@ -5,7 +5,7 @@ pub enum Error {
     #[error("request failed to `{path}`")]
     Reqwest {
         #[source]
-        e: reqwest::Error,
+        e: reqwest_middleware::Error,
         path: String, //&'static str works only with handwritten urls, but not parametrized
     },
 

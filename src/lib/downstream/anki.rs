@@ -1,6 +1,9 @@
 use super::super::errors::{Error, Result};
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
+use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
+use reqwest_retry::policies::ExponentialBackoff;
+use reqwest_retry::RetryTransientMiddleware;
 
 trait AnkiAction {}
 
@@ -71,7 +74,7 @@ pub struct Attachment {
 }
 
 pub struct Anki {
-    client: reqwest::Client,
+    client: ClientWithMiddleware,
     url: String,
 }
 
@@ -83,7 +86,11 @@ pub struct AnkiResult<T> {
 
 impl Anki {
     pub fn new(url: String) -> Self {
-        let client = reqwest::Client::new();
+        let retry_policy = ExponentialBackoff::builder().build_with_max_retries(5);
+
+        let client = ClientBuilder::new(reqwest::Client::new())
+            .with(RetryTransientMiddleware::new_with_policy(retry_policy))
+            .build();
         Self { client, url }
     }
 

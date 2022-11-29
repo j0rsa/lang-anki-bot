@@ -202,7 +202,6 @@ mod test {
                 .await
                 .expect("Failed to add note to anki");
             // println!("Added note: {:?}", response);
-            thread::sleep(Duration::from_millis(1200));
         }
 
         anki.sync().await.expect("Failed to sync anki");

@@ -337,6 +337,30 @@ mod tests {
     }
 
     #[test]
+    fn masked_text_v2_test_3() {
+        let item = VocabularyItemsVocabularyItems{
+            cefr_level: VocabularyItemsVocabularyItemsCefrLevel {
+                name: "B1".to_string(),
+            },
+            gender: None,
+            item: Some("test".to_string()),
+            sample_sentence_one: "Johannes flirtet immer mit mir, aber ich will ihn nicht daten. Wir sollten besser Freunde bleiben.".to_string(),
+            test_question: "Johannes flirtet immer mit mir, aber ich will ihn nicht  _______________. Wir sollten besser Freunde bleiben.".to_string(),
+            title: "test".to_string(),
+            word_class: VocabularyItemWordClassType::phrase,
+        };
+        let expected_text = "\
+        Johannes flirtet immer mit mir, aber ich will ihn nicht {{c1::daten}}. Wir sollten besser Freunde bleiben.<br/>\
+        <br/>\
+        - test\
+        ";
+
+        let text_v2 = masked_text_v2(&item);
+        assert!(text_v2.is_some());
+        assert_eq!(text_v2.unwrap(), expected_text)
+    }
+
+    #[test]
     fn masked_text_v2_test_fail() {
         let item = VocabularyItemsVocabularyItems{
             cefr_level: VocabularyItemsVocabularyItemsCefrLevel {
