@@ -22,12 +22,17 @@ WORKDIR /app
 FROM base as base-amd64
 ARG RUST_TARGET_AMD64
 ENV RUST_TARGET=$RUST_TARGET_AMD64
+# https://burgers.io/cross-compile-rust-from-arm-to-x86-64
+ENV CC_x86_64_unknown_linux_musl=x86_64-linux-gnu-gcc
+
 RUN rustup target add $RUST_TARGET &&\
     apt install -y \
     # musl compiler
     musl-tools musl-dev \
     # cc linker fix -> https://stackoverflow.com/questions/66556519/cannot-compile-rust-project-linking-with-cc-failed
-    gcc-multilib gcc libpq5
+    gcc-multilib gcc \
+    # https://github.com/rust-lang/rust/issues/25289https://github.com/rust-lang/rust/issues/25289
+    libpq-dev
 ENV LDFLAGS=-lpthread \
     OPENSSL_DIR=/usr/local/musl
 WORKDIR /app
