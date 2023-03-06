@@ -34,7 +34,7 @@ log = "0.4.14"
 env_logger = "0.10.0"
 
 #html parser
-scraper = "0.14.0"
+scraper = "0.15.0"
 
 # errors handling
 thiserror = "1.0"
